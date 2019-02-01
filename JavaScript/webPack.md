@@ -5,8 +5,7 @@
 安装命令
 
 ```
-npm i webpack -D
-npm i webpack-dev-server -D
+npm i webpack webpack-dev-server webpack-cli -D
 ```
 
 `webpack-dev-server` 打包生成的文件，放在了内存中，不会直接生成在物理磁盘中

@@ -173,8 +173,6 @@ index 5781b27.. a4ad2ea 100644
 | `git describe ref`                 | ref 是能被git识别的记录引用，如果没有指定 Git 会以 HEAD 为基准点，输出结果为 tag_numCommits_ghash ，tag 表示是离 ref 最近的标签，numCommits 表示 ref 与 tag 相差有多少个提交，hash 表示 ref hash 值的前几位，当有标签时只输出标签 |
 | git push origin source:destination | 表示将 source^(^可以指定提交)分支的内容 推送到远程的 destination 分支去 |
 
-
-
 ```
 相对引用 ^ 向上移动 1 个提交记录
 ~num 向上移动多个提交记录 如：~3
