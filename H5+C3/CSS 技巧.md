@@ -156,7 +156,7 @@ fix 固定定位：和父元素没有关系，只以浏览器为基点
 
 
 
-去除图片底侧缝隙，因为图片适合基线对齐
+#### 去除图片底侧缝隙，因为图片适合基线对齐
 
 ```css
 img {
@@ -166,7 +166,7 @@ img {
 
 
 
-轮播图结构
+#### 轮播图结构
 
 ```html
 <div class="lunbotu">
@@ -187,7 +187,7 @@ img {
 
 
 
-图片自适应，等比例缩放
+#### 图片自适应，等比例缩放
 
 ```html
 <style>
@@ -208,7 +208,7 @@ img {
 
 
 
-tab 栏切换
+#### tab 栏切换
 
 ```html
 <div class="news">
@@ -223,7 +223,7 @@ tab 栏切换
 
 
 
-CSS 指定超出几行自动隐藏
+#### CSS 指定超出几行自动隐藏
 
 ```css
 -webkit-line-clamp: n;	// 设置行数，n 为行数 （必选）
@@ -238,3 +238,76 @@ overflow:hidden;	// 隐藏溢出的内容
 text-overflow:ellipsis;	// 超出的内容显示省略号
 ```
 
+#### 实现文字渐变
+
+1. 
+
+```html
+<p class="font1">渐变色字体</p>
+<style>
+	.font1{
+  background-image: -webkit-linear-gradient(bottom, rgb(201, 21, 134), rgb(20, 123, 255));
+  -webkit-background-clip: text;
+  color: transparent;
+}
+</style>
+```
+
+**效果：**
+
+![1549002331439](assets/1549002331439.png)
+
+**原理：**
+
+先设置背景图为渐变色，然后通过 `backgroun-clip` 属性将文字之外的区域都裁剪掉，最后通过 `color:transparent`  将文字设置为透明色，将后面的背景色显示出来
+
+2. 
+
+```html
+<p class="font2" text="你好，我是渐变色字体">你好，我是渐变色字体</p>
+<style>
+.font2 {
+  color:#223aee;
+  position: relative;
+}
+
+.font2:before{
+  content: attr(text);
+   position: absolute;
+   z-index: 10;
+  color:#f82a27;
+  -webkit-mask:linear-gradient(to left, #67a621, transparent );
+}
+</style>
+```
+
+**效果：**
+
+![1549002558165](assets/1549002558165.png)
+
+**原理：**
+
+> 利用 `content:attr(text)` 获取到元素的 text 属性，插入内容到 p 元素中，然后利用遮罩层的原理让元素的某一个部分显示或隐藏，从而实现渐变色字体
+
+3. 
+```html
+<p class="font1">你好，这是我的渐变色字体</p>
+<style>
+.font1{
+  font-size:22px;
+  background-image: -webkit-linear-gradient(bottom, rgb(201, 21, 134), rgb(20, 11, 255));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+ }
+</style>
+```
+
+**效果：**
+
+![1549002725459](assets/1549002725459.png)
+
+**原理：**
+
+> 先设置背景图为渐变色，然后通过 background-clip 属性将文字之外的区域都裁剪掉，最后通过 `fill-color:transparent` 将文字填充颜色设置为透明色，将后面的背景色显示出来
+
+[文字渐变方法转载博客](https://blog.csdn.net/qq_32682137/article/details/83751886)
