@@ -29,7 +29,14 @@
 
 3. 设置稳定的存储库
 
-   `sudo add-apt-repository \   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \   $(lsb_release -cs) \   stable"`  stable可以改成 edge、test
+   ```shell
+   sudo add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) \
+      stable"
+   ```
+
+     stable可以改成 edge、test
 
 4. 再更新apt软件包源
    `sudo atp-get update`
@@ -61,8 +68,8 @@
 
 安装docker-compose 
 
-```
-sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+```shell
+sudo curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 ```
 
    下载的版本自己可以选择[版本](https://github.com/docker/compose/releases)

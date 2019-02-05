@@ -7,7 +7,7 @@
 2. 配置 `sshKey` 
 
 ```
-ssh-keygen -t rsa -c 'email';
+ssh-keygen -t rsa -C 'email';
 // Enter file in which to save the key (/c/Users/Excailbur/.ssh/id_rsa):这里的名字根据需要自定义；如：
 /c/Users/Excailbur/.ssh/git_id_rsa
 // 后面的提示可以直接 enter 过
