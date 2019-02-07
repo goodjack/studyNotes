@@ -63,3 +63,80 @@ return redirect()->back()->withInput();
 ```
 
 laravel 默认配置中，如果用户登录后没有使用记住我功能，则登录状态只会被记住两个小时
+
+[laravel 中间件](https://learnku.com/docs/laravel/5.7/middleware/2254)为过滤进入应用程序的 HTTP 请求提供了一种方便的机制
+
+laravel 提供了一个 Auth 中间件，在控制器的 `__construct` 方法中调用
+
+```php
+public function __construct()
+{
+    $this->middleware('auth',[
+        'except'	=>	['show','create','store'] // 定义除了这个3个方法其余方法都需要验证
+    ])
+}
+```
+
+laravel 提供的 Auth 中间件在过滤指定动作时，会将未通过身份验证的用户重定向到 `/login`  登录页面
+
+**用户只能编辑自己的资料，需要限制已登录用户的操作，当 ID 为 1 的用户尝试更新 ID 为 2 的用户信息时，应该返回一个 403 禁止访问的异常。laravel 的 [授权策略](https://learnku.com/docs/laravel/5.7/authorization/2271#policies)可以对用户的操作权限进行验证**
+
+```php
+php artisan make:policy UserPolicy // 生成至 app/Policies 文件夹下
+    
+# app/Policies/UserPolicy.php
+class UserPolicy
+{
+    .
+    .
+    .
+    public function update(User $currentUser,User $user)
+    {
+        return $currentUser->id == $user->id;
+    }
+    
+    // 此处的 $currentUser 是当前登录用户实例(等于 Auth::user())，$user 是要进行授权的用户实例（也就是隐式路由自动绑定的实例）
+   // 并不需要检查 $currentUser 是不是 NULL ，未登录用户，框架会自动给为其所有权限返回 false
+}
+
+# AuthServiceProvider 类中 Policies 属性上对授权策略进行设置
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        'App\Model'	=>	'App\Policies\ModelPolicy',
+        \App\Models\User::class => \App\Policies\UserPolicy::class
+    ];
+    // 这样便可以在控制器中的 authorize 方法来验证用户授权策略
+}
+
+class UsersController extends Controller
+{
+    public function create()
+    {
+        // $this->authorize('update',$user);
+        // create 方法不需要验证是否是同一个用户，可以这样使用：
+        $this->authorize('update',User::class);
+    }
+}
+```
+##### 友好的转向
+
+当一个未登录用户尝试访问自己的编辑页面时，会自动跳转到登录页面，如果用户进行登录，则应该将其重定向至他尝试访问的页面，redirect() 提供了一个 intended 方法，该方法可将页面重定向到上一次请求尝试访问的页面，并接受一个默认跳转地址参数，当上一次请求为空时跳转到默认地址上。
+
+```php
+$fallback = route('users.show',Auth::user());
+return redirect()->intended($fallback);
+```
+
+Laravel Auth 中间件提供 `guest` 选项，用于指定一些只允许未登录用户访问的动作，对 `guest` 属性进行设置，只让未登录用户访问登录页面和注册页面
+
+```php
+$this->middleware('guest',[
+    'only'	=>	['create']
+]);
+```
+
+###### 账户激活
+
+给用户表新增两个字段用于保存用户的激活令牌和激活状态，激活令牌用于验证用户身份，激活状态用于判断用户是否已激活。
+
