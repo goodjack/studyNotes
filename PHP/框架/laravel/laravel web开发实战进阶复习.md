@@ -17,5 +17,25 @@ Class User extends Controller implements MustVerifyEmailContract
 }
 ```
 
+###### 新建话题 观察者模式
+
+观察者类的方法名反映 Eloquent 想监听的事件，每个方法接受 model 作为唯一参数
+
+```php
+php artisan make:observer UserObserver --model=User
+```
+
+在 `AppServiceProvider` 注册观察者
+
+```php
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        User::observer(UserObserver::class);
+    }
+}
+```
+
 
 
