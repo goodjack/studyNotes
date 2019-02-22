@@ -238,6 +238,37 @@ overflow:hidden;	// 隐藏溢出的内容
 text-overflow:ellipsis;	// 超出的内容显示省略号
 ```
 
+#### 边框颜色渐变时，border-radius 失效
+
+```html
+<style>
+    .content {
+        width:300px;
+        height:100px;
+        box-sizing:border-box;
+        padding:5px;
+        border-radius:5px;
+        background-image:-webkit-linear-gradient(left,red 0%,blue 30%,yellow 60%,green 90%);
+    }
+     .box {
+    	width:100%;
+         height:100%;
+         border-radius:5px;	// 子元素需要和父元素的 border-radius 一样
+         background:#fff;
+    } 
+</style>
+
+<div class="content">
+    <div class="box">
+        
+    </div>
+</div>
+```
+
+实现效果：
+
+![1550220344243](assets/1550220344243.png)
+
 #### 实现文字渐变
 
 1. 
@@ -311,3 +342,167 @@ text-overflow:ellipsis;	// 超出的内容显示省略号
 > 先设置背景图为渐变色，然后通过 background-clip 属性将文字之外的区域都裁剪掉，最后通过 `fill-color:transparent` 将文字填充颜色设置为透明色，将后面的背景色显示出来
 
 [文字渐变方法转载博客](https://blog.csdn.net/qq_32682137/article/details/83751886)
+
+
+
+### 条纹渐变色
+
+使用 CSS3 的 `linear-gradient(),repeating-linear-gradient(),radial-gradient(),repeating-radial-gradient()` 实现渐变图像
+
+#### 线性渐变 linear-gradient
+
+第一个参数：可不写，默认值为 to bottom(180deg)，为实现渐变，还需要定义两个颜色节点，每个颜色节点可由两个参数组成，[颜色值 位置值，颜色值 位置值，......]，颜色值为必填项，位置值可为长度，也可以是百分比，非必填项。
+
+例：`linear-gradient(red 30%,blue 80%)` 表示容器顶部 30% 区域被填充为红色，容器中间 50% 高度区域被填充为从红色到蓝色的渐变色，容器底部 20% 区域被填充为蓝色
+
+##### 实现条纹效果
+
+> 当相邻两个颜色的位置值相同时，颜色之间会产生无限小的过渡区域。其产生的效果和条纹一样。
+
+图一：
+
+![1550470628520](assets/1550470628520.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      background: linear-gradient(#5e88a9 50%, #f8bb47 50%);
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
+图二：
+
+![1550470926497](assets/1550470926497.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      background: linear-gradient(
+        #5e88a9 30%, // 表示 0 - 30 之间显示这个颜色
+        #f8bb47 30%, // 使用条纹原理，产生一个无限小的过渡区
+        #f8bb47 65%, // 30 - 65 之间显示这个颜色
+        #d76a60 0 // css 规范：如果某个色标的位置比整个列表中在它之前的色标位置值都要小，则该色标的位置值会被设置为它前面所有色标位置值的最大值，所以此时 0 也可以是 65%，表示的含义就是 65% 以后显示的颜色为该颜色
+      );
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
+##### 实现条纹背景
+
+需要使用 `background-size` 来控制每一块条纹背景的大小，并且 `background-repeat` 设为 `repeat`
+
+图一：
+
+![1550471472654](assets/1550471472654.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      background: linear-gradient(
+        #5e88a9 50%,
+        #f8bb47 0
+      );
+      background-size: 100% 40px; // 参数一 定义图像宽度，二 定义图像高度
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
+图二：
+
+![1550471710163](assets/1550471710163.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      background: linear-gradient(
+        90deg,
+        #5e88a9 33%,
+        #f8bb47 0,
+        #f8bb47 66%,
+        #d76a60 0
+      );
+      background-size: 50px;
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
+##### 斜条纹
+
+![1550472723297](assets/1550472723297.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      margin: 0 auto;
+      background: linear-gradient( // 只能实现 45deg  其它的角度则不太理想
+        45deg,
+        #5e88a9 25%,
+        #f8bb47 0,
+        #f8bb47 50%,
+        #5e88a9 0,
+        #5e88a9 75%,
+        #f8bb47 0
+      );
+      background-size: 40px 40px;
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
+##### 重复线性渐变 repeating-linear-gradient
+
+![1550473807887](assets/1550473807887.png)
+
+```html
+<style>
+    .box {
+      width: 300px;
+      height: 200px;
+      margin: 0 auto;
+      background: repeating-linear-gradient(
+        75deg,
+        #5e88a9,
+        #5e88a9 15px,
+        #f8bb47 0,
+        #f8bb47 30px,
+        #d76a5f 0,
+        #d76a5f 45px
+      );
+    }
+  </style>
+
+  <body>
+    <div class="box"></div>
+  </body>
+```
+
