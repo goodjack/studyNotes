@@ -37,5 +37,56 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
+###### 使用队列
 
+队列系统可以异步执行消耗时间的任务，比如请求一个 API 并等待返回的结果，这样可以有效降低请求响应时间
+
+失败任务，laravel  内置了一个 failed_jobs 表的迁移文件 
+
+```php
+php artisan queue:failed-table // 生成迁移文件
+```
+
+生成一个任务类
+
+```php
+php artisan make:jobs TranslateSlug
+```
+
+注意：在模型监控器中分发任务，任务中需要避免使用  Eloquent 模型接口调用，如：`create，update，save` 等，否则会陷入死循环，模型监控器分发任务-》任务触发模型监控器-》模型监控器再次分发任务-》任务再次触发模型监控器，在这种情况下，使用 DB 类直接对数据库进行操作
+
+在模型监控器中分发任务
+
+```php
+class TopicObserver
+{
+    public function saved(Topic $topic)
+    {
+        ...
+            if(!$topic->slug){
+                // 推送任务到队列
+                dispatch(new TranslateSlug($topic));
+            }
+    }
+}
+```
+
+可以使用 `php artisan queue:listen` 启动监听队列系统
+
+使用 Horizon 方便查看和管理 redis 队列任务执行情况
+
+```php
+composer require laravel/horizon
+php artisan vendor:publish --provider="Laravel\Horizon\HorizonServiceProvider"
+    // 发布 horizon 相关配置文件
+    // config/horizon.php 配置文件
+    // public/vendor/horizon css js 页面资源文件
+```
+
+`php artisan horizon` 启动，再打开 `host/horizon/dashboard` 查看
+
+注意：生产环境下使用队列需要注意两个问题：
+
+1. 使用 Supervisor 进程工具进行管理
+2. 每一次部署代码时，需 `artisan horizon:terminate` 然后再 `artisan horizon` 重新加载代码
 
