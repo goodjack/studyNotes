@@ -1,18 +1,19 @@
 # laravel Artisan 命令
 
-| 命令                         | 说明           |
-| ---------------------------- | -------------- |
-| php artisan key:generate     | 生成App Key    |
-| php artisan make:controller  | 生成控制器     |
-| php artisan make:model       | 生成模型       |
-| php artisan make:policy      | 生成授权策略   |
-| php artisan make:seeder      | 生成Seeder文件 |
-| php artisan migrate          | 执行迁移       |
-| php artisan migrate:rollback | 回滚迁移       |
-| php artisan migrate:refresh  | 重置数据库     |
-| php artisan db:seed          | 填充数据库     |
-| php artisan tinker           | 进入tinker环境 |
-| php artisan route:list       | 查看路由列表   |
+| 命令                                             | 说明                                             |
+| ------------------------------------------------ | ------------------------------------------------ |
+| php artisan key:generate                         | 生成App Key                                      |
+| php artisan make:controller                      | 生成控制器                                       |
+| php artisan make:model                           | 生成模型                                         |
+| php artisan make:policy                          | 生成授权策略                                     |
+| php artisan make:seeder                          | 生成Seeder文件                                   |
+| php artisan migrate                              | 执行迁移                                         |
+| php artisan migrate:rollback                     | 回滚迁移                                         |
+| php artisan migrate:refresh                      | 重置数据库                                       |
+| php artisan db:seed                              | 填充数据库                                       |
+| php artisan tinker                               | 进入tinker环境                                   |
+| php artisan route:list                           | 查看路由列表                                     |
+| php artisan make：command xxxx --command=xx:xxxx | 创建一个命令 --command 是指定 artisan 调用的命令 |
 
 可以使用`php artisan help migrate`
 

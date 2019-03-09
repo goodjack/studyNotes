@@ -90,3 +90,51 @@ php artisan vendor:publish --provider="Laravel\Horizon\HorizonServiceProvider"
 1. 使用 Supervisor 进程工具进行管理
 2. 每一次部署代码时，需 `artisan horizon:terminate` 然后再 `artisan horizon` 重新加载代码
 
+##### laravel 消息通知
+
+```php
+// laravel 有一个默认的通知表
+php artisan notifications:table
+// 
+```
+
+生成通知类
+
+```php
+php artisan make:notification TopicReplied
+```
+
+```php
+// 通知类 TopicReplied 内此方法定义通知在哪个频道发送
+public function via($notifiable)
+{
+  	return ['mail','database']  
+}
+
+//针对不同的频道实现不同的方法
+public function tomail($notifiable){}
+public function toDatabase($notifiable){}
+```
+
+#### 多角色用户权限管理
+
+
+
+#### 活跃用户
+
+活跃用户算法：
+
+系统每小时计算一次，统计最近 7 天所有用户发的帖子数和评论数，用户每发一个帖子得 4 分，每发一个回复得 1 分，计算出所有得分再倒序，将排名前八的用户显示在活跃用户列表里。
+
+使用laravel 命令调度器对laravel 命令调度
+
+
+
+#### 最近活跃用户
+
+思路：使用 redis 记录用户访问时间，定期将 redis 数据同步到数据库中
+
+1. 使用中间件过滤用户所有请求，记录用户访问时间到 redis 按日期区分的哈希表
+2. 同步，使用计划任务每天运行一次此命令，将昨日哈希表的数据同步到数据库中，并删除
+3. 读取，优先读取当日 Redis 里的数据，无数据则使用数据库的值
+
