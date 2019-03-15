@@ -4,7 +4,7 @@
 | ------------------------------------------------ | ------------------------------------------------ |
 | php artisan key:generate                         | 生成App Key                                      |
 | php artisan make:controller                      | 生成控制器                                       |
-| php artisan make:model                           | 生成模型                                         |
+| php artisan make:model -fm                       | 生成模型 -fm 参数生成 factory 和 migration 文件  |
 | php artisan make:policy                          | 生成授权策略                                     |
 | php artisan make:seeder                          | 生成Seeder文件                                   |
 | php artisan migrate                              | 执行迁移                                         |
