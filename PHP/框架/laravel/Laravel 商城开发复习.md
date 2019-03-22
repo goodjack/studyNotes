@@ -16,3 +16,37 @@ path 字段意义：
 3. 判断两个类目是否有祖孙关系，需要从层级低的类目逐级往上查，性能低下
 
 path 字段保存该类目的所有祖先类目 ID，并用 `-` 分隔
+
+
+
+laravel 提供了一种 viewComposer 的功能，可以在不修改控制器的情况下直接向指定的模板文件注入变量
+
+viewcomposer 类 通常放在 `app/Http/ViewComposers` 目录下
+
+```php
+class CategoryTreeComposer
+{
+    protected $categoryService;
+    
+    // 此处 laravel 会自动依赖注入
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categorySerivce = $categoryService;
+    }
+    
+    // 当渲染指定模板时， laravel 会调用 compose 方法
+    public function compose（View $view)
+    {
+        $view->with('categoryTree',$this->categoryService->getCategoryTree());
+    }
+}
+
+// app/Providers/AppServiceProvider
+
+public function boot()
+{
+ // 当laravel 渲染 products.index products.show 时就会使用 CategoryTreeComposer 注入这个类目树的变量
+    \View::composer(['products.index','products.show'],CategoryTreeComposer::class);
+}
+```
+
