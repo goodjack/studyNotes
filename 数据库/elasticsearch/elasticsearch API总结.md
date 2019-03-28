@@ -168,7 +168,14 @@ POST /_mget
         }
     ]
 }
+如果文档具有相同的 _index 和 _type 可以通过 ids 数组来代替完整的 docs 数组
+POST /index/type/_mget
+{
+    "ids":["2","1"]
+}
 ```
+
+更新时的批量操作
 
 
 
