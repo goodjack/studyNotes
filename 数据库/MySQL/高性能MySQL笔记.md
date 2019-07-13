@@ -34,7 +34,7 @@
 
 共享锁是指对于多个不同的事务，对同一个资源共享同一个锁。
 
-共享锁调用，通过对语句加上 **lock in share mode**`select * from city where id = "1" lock in share mode;`
+共享锁调用，通过对语句加上 **lock in share mode**   `select * from city where id = "1" lock in share mode;`
 
 - 排它锁
 
@@ -196,7 +196,7 @@ MySQL 可以为整数类型指定宽度，例 INT(11)，这对大多数应用没
 
 **缺点**:
 
-- 需要关联，在复杂一些的查询语句符合范式的 schema 上至少需要一次关联，这会是一些索引策略无效
+- 需要关联，在复杂一些的查询语句符合范式的 schema 上至少需要一次关联，这会使一些索引策略无效
 
 #### 反范式的优缺点
 

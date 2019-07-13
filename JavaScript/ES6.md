@@ -110,6 +110,27 @@ const day = matchObj.groups.day; // 31
 
 ### 函数扩展
 
+#### 函数结构赋值使用
+
+```javascript
+function foo({x,y=5}) {
+    console.log(x,y);
+}
+foo({}) // undefined 5
+foo({x:1}) // 1 5
+foo({x:1,y:2}) // 1 2
+foo() // TypeError:Cannot read property 'x' of undefined 
+// 会报 Type Error错误是因为只使用了对象的解构赋值默认值，没有使用函数参数的默认值。只用当函数 foo 的参数是一个对象时，变量 x 和 y 才会通过结构赋值生成。
+
+function foo({x,y=5} = {}) {
+    console.log(x,y);
+}
+foo() // undefined 5 
+
+```
+
+
+
 `reset` 参数写法 `function add(...values)` 
 
 箭头函数注意点：
