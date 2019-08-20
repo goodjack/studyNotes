@@ -23,6 +23,7 @@
 | tar -xzvf file.tar.gz -C /path | 解压到指定文件夹                                             |
 |查看 Linux 内核版本|uname -a 或者 cat /proc/version|
 |查看 Linux 系统版本的命令|lsb_release -a 或者 cat /etc/issue|
+|查看 Linux 发行版本（推荐）|cat /etc/*release|
 
 
 
