@@ -45,7 +45,7 @@
 | git stripsapce < README.md                                  | 去掉行尾空白符，多个空行压缩成一行，必要时在文件末尾增加一个空行 |
 | git show :/query                                            | 查询之前所有提交信息，找到条件相匹配的最近一条，query是想搜索的词语，区分大小写，q键退出 |
 | git remote add name url                                     | 添加远程仓库 name为自定义主机名 url为git远程仓库地址         |
-|                                                             |                                                              |
+| git update-index --assume-unchanged PATH                    | 忽略指定的文件或目录，由于这个文件是被版本库追踪的且是共有的，使用这个命令会忽略本地的修改，这样可以使的不会影响他人 |
 
 **git文件比较**
 
