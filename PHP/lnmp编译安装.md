@@ -123,8 +123,7 @@
 
     `composer config -g repo.packagist composer https://packagist.laravel-china.org`
 
-
-遇到的编译 PHP 出错状况：
+#### 遇到的编译 PHP 出错状况：
 
 1. g++: internal compiler error: Killed (program cc1plus) 使用 阿里 ECS 1G 内存的服务器时遇到的状态，在内存比较低的情况下，会报这个错，解决方法：
 
@@ -134,6 +133,15 @@ mkswap /swapfile	# 创建交换分区
 swapon /swapfile	# 挂在分区
 swapon -s # 查看创建的交换分区
 ```
+
+2. 在 deepin 系统上编译安装是遇到一个 `error: cURL version 7.15.5 or later is required to compile php with cURL support` 这样的错误，解决方法是：
+
+```
+在 centos 系统遇到，安装 curl-devel 库
+在 ubuntu17+ 或者 deepin18+，安装 libcurl4-gnutls-dev 库
+```
+
+
 
 ### 配置 Https 
 
