@@ -199,3 +199,28 @@ class Test extends Component {
 }
 ```
 
+
+
+#### props 使用
+
+```react
+class Mouse extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            a:'1'
+        }
+    }
+    function t(){
+        
+    }
+    
+    render(){
+        <p>{this.props.id}</p>    // props 访问组件上赋的值
+        {this.t.bind(this)}	// 访问方法则不必
+    }
+}
+
+<Mouse id='12'></Mouse>
+```
+
