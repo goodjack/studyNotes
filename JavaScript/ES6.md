@@ -486,6 +486,8 @@ for(let x of Array.from(arrayLike)){
 
 ### Generator 语法和异步应用
 
+generator 实现了 es6 的协程，最大的特点就是可以交出函数的执行权（即暂停执行）。异步操作需要暂停的地方，都用 `yield` 语句实现。
+
 Generator 函数是一个普通函数，有两个特征。
 
 一、`function` 关键字与函数名之间有一个星号 `*`
@@ -508,7 +510,7 @@ a.next();	// Object(value:NaN,done:false)
 a.next();	// Object(value:NaN,done:true)
 
 let b = foo(5);
-b.next();	// {value:5,done:false}
+b.next();	// {value:6,done:false}
 b.next(12)	// {value:8,done:false}
 b.next(13)	// {value:42,done:true}
 ```
@@ -525,13 +527,14 @@ b.next(13)	// {value:42,done:true}
 
 async 函数是 Generator 函数语法糖
 
-```
-async function(){
-    await 
-}
+```JavaScript
+const as = async function(){
+    const f1 = await func1();
+    const f2 = await func2();
+};
 ```
 
-返回 promise 对象
+async 返回 promise 对象，可以用 then 指定下一步操作。
 
 `for async (const x of items)`  遍历异步的接口，也可以遍历同步接口
 
