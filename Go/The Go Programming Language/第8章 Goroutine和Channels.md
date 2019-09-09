@@ -76,3 +76,16 @@ select {
 }
 ```
 
+### 带缓冲的通道
+
+```go
+// 测试最先接受到哪个,使用了带缓冲的通道
+resp := make(chan string,3)
+go func() { resp <- request('baidu.com')  }()
+go func() { resp <- request('google.com') }()
+go func() { resp <- request('taobao.com') }()
+return <-resp
+```
+
+**Tips：每个协程都使用了同一个通道的情况下，需要确保足够的容量，这样就避免了剩余的 goroutines 因为没有被接收而被永远卡住的情况，这种情况被称之为 goroutines 泄漏。泄漏的 goroutines 不会被自动回收，因此需要确保每个不再需要的 goroutine 能正常退出。**
+
