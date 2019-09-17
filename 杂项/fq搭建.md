@@ -26,9 +26,9 @@ wget -N --no-check-certificate https://raw.githubusercontent.com/FunctionClub/ZB
 
 ### 检测工具
 
-[http://ping.pe]()
+[http://ping.pe](http://ping.pe)
 
-[https://ipcheck.need.sh]()
+[https://ipcheck.need.sh](https://ipcheck.need.sh)
 
 
 
