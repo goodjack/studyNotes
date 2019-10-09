@@ -1,7 +1,7 @@
 #### laravel 设置定时任务
 
 ```sh
-* * * * * php /path-project/artisan schedult:run >> /dev/null 2>&1
+* * * * * php /path-project/artisan schedule:run >> /dev/null 2>&1
 ```
 
 ##### cron 执行用户导致 laravel.log 不可写
