@@ -54,7 +54,7 @@ phpstorm 无法直接访问 samba 的文件，需要使用软连接
 
 **win10 软连接 mklink**
 
-[mklink 使用]( https://liam.page/2018/12/10/mklink-in-Windows/ )
+[mklink 使用](https://liam.page/2018/12/10/mklink-in-Windows/)
 
 mklink 使用：
 
