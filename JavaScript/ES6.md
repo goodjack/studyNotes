@@ -677,9 +677,30 @@ function readonly(target,name,descriptor){
 模块功能主要有两个命令构成：
 
 - `export`：规定模块的对外接口
+
 - `export default xx`：用于指定模块的默认输出，一个模块只能有一个默认输出
+  ```javascript
+  export const someVar = 123;
+  export { someVar,someFunc };
+  export { someVar as differentVarName }
+  
+  // 默认导出注意事项：
+  // 在一个变量之前不需要使用 let/const/var;
+  export default (someVar = 123);
+  ```
+
 - `import`：输入其他模块提供功能，在静态解析阶段执行，是一个模块中最早执行的
+
 - `import()` ：运行时执行，不仅可以是模块，也可以是非模块的脚本，与 node 的 `require()` ，却别是前者是 异步加载，后者是同步加载
+
+导出规则：当导入路径不是相对路径时，模块解析会模仿 node 模块解析策略。如：
+
+`import * as foo from 'foo`，查找顺序如下：
+
+1. `./node_modules/foo`
+2. `../node_modules/foo`
+3. `../../node_modules/foo`
+4. 直到系统的根目录
 
 ### Module 加载实现
 
