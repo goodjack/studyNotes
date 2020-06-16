@@ -1,3 +1,5 @@
+## ssh 免密登录
+
 1. 在本机先使用 `ssh-keygen -t rsa -c "xxxx@.com"` 生成公私钥
 
 2. 使用 `ssh-copy-id -i "~/.ssh/xxx_id_rsa.pub" user@server_ip` 此时就将生成的公钥复制到了指定的 server_ip 上
@@ -28,3 +30,15 @@
 
    - Ubuntu、Debian：`sudo systemctl restart ssh`
    - Centos、Fedora：`sudo systemctl restart sshd`
+
+## ssh 传输文件
+
+- 从服务器下载文件
+
+  `scp server_user@ip:file_address local_file_address`
+
+- 上传文件到服务器
+
+  `scp local_file_address server_user@ip:remote_file_address`
+
+**对于文件夹的操作加入参数 -r 即可**

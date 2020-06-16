@@ -7,7 +7,7 @@
 |      ctrl+e       | command + e           |         查看当前编辑过的文件         |
 | ctrl+shfit+insert | Control + option + N  |        在当前文件夹内创建文件        |
 |   ctrl+shift+L    | option + command + L  |              代码格式化              |
-| ctrl+shift+alt+T  |                       |             代码片段重构             |
+| ctrl+shift+alt+T  | control + t           |             代码片段重构             |
 |       alt+j       | control + G           |                 选中                 |
 |    alt+shift+j    | control + shift + G   |               撤销选中               |
 | alt+ctrl+shift+j  | control + command + G |               全部选中               |

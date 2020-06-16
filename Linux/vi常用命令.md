@@ -80,3 +80,14 @@
 | :syntax on，:syntax off | 是否开启根据相关语法显示不同颜色，语法检测 |
 | :set bg=dark，:set bg=light | 显示不同的颜色色调|
 
+### 替换命令
+
+```shell
+标志位：g（全局） i（大小写不敏感） c（需要确认）
+%s/foo/bar/g # 在全局范围（%）查找 foo 并替换为 bar，所有的都会替换（g）
+s/foo/bar/g # 当前行
+'<,'>s/foo/bar/g # 在 Visual 模式下选择区域后
+5,12s/foo/bar/g # 5-12行替换
+.,+2s/foo/bar/g # 当前行与下两行，替换
+```
+

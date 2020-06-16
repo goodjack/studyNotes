@@ -47,3 +47,6 @@ services:
          - tp.test
 ```
 
+### docker 容器访问宿主机服务
+
+将宿主机地址直接写成 `host.docker.internal` ，需要 docker 版本大于 18.03
