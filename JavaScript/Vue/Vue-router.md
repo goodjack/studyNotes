@@ -14,5 +14,20 @@
    - name：路由配置文件中的name值
    - params：以对象形式传递要传的参数
    - {{$route.params.key}}：这种形式接受传递的参数
-2. 
+
+#### 动态添加路由，退出后无刷新清空路由
+
+```js
+function resetTOken() {
+  const vm = new Router({ // 先创建一个新的路由实例
+    mode:"history",
+    base: process.env.BASE_URL,
+    routes: []
+  });
+  
+  router.matcher = vm.matcher
+}
+```
+
+
 

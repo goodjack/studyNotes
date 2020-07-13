@@ -239,6 +239,25 @@ factorial(5); //120
 
 ### 对象扩展
 
+#### in 
+
+in 关键字判断一个对象是否包含某个属性
+
+```js
+const a = {
+  q: 3
+  w: 4
+}
+
+console.log("q" in a) // true
+
+// 同时 in 也可以使用在数组上
+const arr = [1,2,3]
+console.log(3 in arr) // false 判断的索引 3 位置上是否有值
+```
+
+
+
 对象属性名允许使用表达式
 
 ##### 属性的可枚举性和遍历
@@ -288,6 +307,26 @@ Object.getOwnPropertyDescriptor(obj,'foo');
 >扩展运算符的解构赋值，不能复制继承自原型对象的属性
 
 ### Symbol
+
+唯一的符号，用于取代会发生冲突的key 和值定义
+
+```js
+const s = Symbol()
+
+const areaType = {
+  square: Symbol(),
+  cicrle: Symbol(),
+}
+
+function getArea(type) {
+  switch(type) {
+    case areaType.square:
+      return 1
+    case areaType.cicrle:
+      return 2
+  }
+}
+```
 
 
 
@@ -340,6 +379,25 @@ handler ：定制拦截行为
 
 
 ### Reflect
+
+- 将 Object 内的一些方法移到了 reflect 上
+- 修改某些 Object 返回的结果
+
+```js
+// es5
+try {
+  Object.defineProperty()
+} catch (e) {
+  
+}
+
+// es6
+if (Reflect.defineProperty()) {
+  
+}
+```
+
+
 
 ### Promise 对象
 

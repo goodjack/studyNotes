@@ -15,6 +15,7 @@
 |                   | Command + B           |           跳转到定义的方法           |
 |                   | command + 】/ 【      |               前后跳转               |
 |    ctrl+alt+o     | control+option+o      | 去除未使用的 use（optimize imports） |
+|                   | command + d           |          复制当前行至下一行          |
 
 ### 后缀补全
 

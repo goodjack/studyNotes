@@ -47,7 +47,9 @@ $('textarea').each(function () {
         });
 ```
 
-JavaScript 获取 cookie 值
+### JavaScript 获取 cookie 值 
+
+**推荐使用 js-cookie 库**
 
 ```javascript
 function getCookie(cname)
@@ -60,6 +62,16 @@ function getCookie(cname)
         if (c.indexOf(name)==0) return c.substring(name.length,c.length);
     }
     return "";
+}
+```
+
+### 检查数据类型
+
+在使用 **typeof** 判断数据类型时，没有办法判断复杂数据类型只能判断基础数据类型
+
+```js
+function checkType(data) {
+  return Object.prototype.toString.call(data).slice(8,-1)
 }
 ```
 
