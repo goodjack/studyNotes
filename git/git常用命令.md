@@ -120,21 +120,30 @@
 
 | Git命令                            | 说明                                                         |
 | ---------------------------------- | ------------------------------------------------------------ |
-| `git rebase`                       | 合并分支，可以创造线性的提交历史                             |
+| git merge                          | 合并分支，git merge {branch} 在当前所在分支把 branch 拉过来  |
+| `git rebase`                       | 合并分支，可以创造线性的提交历史，git rebase {branch}，将当前所在的分支合并到 {branch} |
 | `git checkout HEAD`                | 改变 head 指向可使用 `HEAD^` 或 `HEAD~num`                   |
 | `git rebase --interactive HEAD^`   | 交互式 rebase 可以选择HEAD内排序方式 --interactive 简写 -i   |
-| `git branch -f 分支名 hash值`      | -f 参数强制改变分支的指向，hash 值 在 git log 可以查看       |
+| `git branch -f 分支名 hash值`      | -f 参数强制改变分支的指向，hash 值 在 git log 可以查看，git branch -f {branch} HEAD~3，将 branch 分支强制移动到了 HEAD位置的前3个位置上，也就表示此时的branch分支指向的位置在 HEAD 的前3个上 |
 | `git reset HEAD^`                  | 撤销更改本地可见                                             |
-| `git revert HEAD^`                 | 撤销更改，会创建一个当前节点的一个副本，此副本与父节点一致   |
-| `git cherry-pick hash 值`          | 整理提交，可以选择需要其他分支的那些提交                     |
+| `git revert HEAD^`                 | 撤销更改（不是直接指向），会创建副本，此副本与父节点一致     |
+| `git cherry-pick hash 值`          | 整理提交，可以选择需要其他分支的那些提交，git cherry-pick c3 c4 c8，表示将 c3 c4 c8 合并到当前分支下 |
 | `git tag 标签 hash值`              | 给指定提交添加标签                                           |
 | `git describe ref`                 | ref 是能被git识别的记录引用，如果没有指定 Git 会以 HEAD 为基准点，输出结果为 tag_numCommits_ghash ，tag 表示是离 ref 最近的标签，numCommits 表示 ref 与 tag 相差有多少个提交，hash 表示 ref hash 值的前几位，当有标签时只输出标签 |
 | git push origin source:destination | 表示将 source^(^可以指定提交)分支的内容 推送到远程的 destination 分支去 |
+
+> cat .git/HEAD 可以查看当前的HEAD 指向，如果 HEAD 指向了一个引用，可以用 git symbolic-ref HEAD 查看它的指向
 
 ```
 相对引用 ^ 向上移动 1 个提交记录
 ~num 向上移动多个提交记录 如：~3
 ```
+
+| 命令                                  | 说明                                                         |
+| ------------------------------------- | ------------------------------------------------------------ |
+| git checkout -b local-branch o/branch | 这样可以使得本地的分支绑定远程对应的分支                     |
+| git branch -u o/master local-branch   | 同上的功能，如果是想绑定当前分支到远程分支上，还可以省略本地分支参数 |
+|                                       |                                                              |
 
 `git push 远程主机名（一般都是 origin）本地分支:远程分支` 
 

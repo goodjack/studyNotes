@@ -105,22 +105,41 @@
     make
     make install
     ```
-
+	**7.4 mbstring 需要该 oniguruma 扩展，centos8 默认是没有开启这个扩展的devel版本，需要去 https://pkgs.org 去这个网址搜索这个扩展的devel版本，进行安装。**
     5. 完成安装后配置 php.ini 文件
         - cp php.ini-development  php目录/lib/php.ini （没有指定config path 配置文件就不在 etc 内 而在 lib 内）
         - cp php目录/etc/php-fpm.conf.default  php目录/etc/php-fpm.conf
         - cp php目录/etc/php-fpm.d/www.conf.default  php目录/etc/php-fpm.d/www.conf
+6. 安装完成设置一个软链接
+    7. 配置php-fpm的service（centos)
 
-    6. 安装完成设置一个软链接
-
+    ```
+# 创建 /usr/lib/systemd/system/php-fpm.service
+    
+[Unit]
+    Description=php-fpm server
+After=network.target
+    
+[Service]
+    PIDFile=/run/php-fpm.pid
+    ExecStart=/usr/local/sbin/php-fpm
+    ExecStop=/bin/kill -QUIT $MAINPID
+    ExecReload=/bin/kill -USR2 $MAINPID
+    
+    [Install]
+    WantedBy=mutli-user.target
+    ```
+    
+    
+    
     `ln -s path(--prefix 设置的目录) /usr/bin/php`
-
+    
     附带安装下 composer
-
+    
     `php -r "readfile('https://getcomposer.org/installer');" | php`
-
+    
     `mv ./composer.phar /usr/bin/composer`
-
+    
     `composer config -g repo.packagist composer https://packagist.laravel-china.org`
 
 #### 遇到的编译 PHP 出错状况：

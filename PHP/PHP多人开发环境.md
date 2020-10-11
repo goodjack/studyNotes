@@ -10,4 +10,3 @@ root /data/gateway/$who/html;
 ```
 
 参考文章 [PHP多人开发环境原理解析](https://wenda.shukaiming.com/article/433)
-
