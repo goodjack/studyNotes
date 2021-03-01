@@ -1,7 +1,7 @@
 wsl2 因为使用了hyper-v的虚拟机，所以和宿主机不在同一个网段中，在使用宿主机的vpn时，需要先获取宿主机的ip：
 
 ```bash
-cat /etc/reslov.conf | grep 'nameserver' | awk '{print $2}'
+cat /etc/resolv.conf | grep 'nameserver' | awk '{print $2}'
 ```
 
 为了便于使用还可以将这个设置一个脚本自动加载proxy

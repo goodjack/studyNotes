@@ -1,14 +1,26 @@
-# Kubernetes 学习
+### k8s 集群架构组件
 
-## k8s 基础概念
+master（主控节点）和node（工作节点）
+
+master组件内包含：
+
+- apiserver：集群统一入口，以restful方式，交给etcd存储
+- scheduler：节点调度，选择node节点应用部署
+- controller-manager：处理集群中常规后台任务，一个资源对应一个控制器
+- etcd：存储系统，用于保存集群相关的数据
+
+node组件：
+
+- kubelet：管理本机容器
+- kube-proxy：提供网络、负载均衡等操作
 
 ### Pod 的概念
 
-Pod 内可以包含多个实例，如：nginx、php-fpm等进程。
+- 最小部署单元
 
-一个 node 节点可以包含多个 pod。
-
-pod 是 k8s 的最小构成单元。
+- 一组容器的集合
+- 共享网络
+- 生命周期短暂
 
 #### 资源类型的配置
 
@@ -77,7 +89,7 @@ spec:
     image: redis:6.0
 ```
 
-**探针：探针是有 kubelet 对容器执行的定期诊断，有三种类型的处理程序：**
+**探针：探针是有由kubelet 对容器执行的定期诊断，有三种类型的处理程序：**
 
 1. ExecAction：在容器内执行指定命令，如果命令退出时返回码为 0，则认为诊断成功
 2. TCPSocketAction：对指定端口上的容器 IP 地址进行 TCP 检查，如果端口打开，则诊断认为成功
@@ -154,9 +166,13 @@ spec:
 
 
 
-## controller
+### controller
 
-用来控制 pod 的具体状态和行为
+- 确保预期的pod副本数量
+- 无状态应用部署
+- 有状态应用部署
+- 确保所有的node运行同一个pod
+- 一次性任务和定时任务
 
 #### 控制器类型
 
@@ -293,9 +309,11 @@ spec:
 
 
 
-## Service 概念
+### Service 概念
 
 **Kubernetes Service 定义了一个抽象：一个 Pod 的逻辑分组，一种可以访问它们的策略 ---- 通常称为微服务。这一组 Pod 能够被 Service 访问到，通常是通过 Label Selector**
+
+定义一组pod的访问规则
 
 Service 能够提供负载均衡的能力，在使用时有限制：
 

@@ -1,3 +1,28 @@
+# channel
+
+```go
+var c chan string // 未初始化，为 nil 的 channel
+<-c // 阻塞
+c <- "a" // 阻塞
+
+c = make(chan string)
+close(c)
+<-c // 关闭后的channel，可读
+c <- "a" // panic
+```
+
+读取管道时，阻塞条件有：
+
+- 管道无缓冲区
+- 管道的缓冲区中无数据
+- 管道的值为nil
+
+写入管道时，阻塞条件：
+
+- 管道无缓冲区
+- 管道的缓冲区已满
+- 管道的值为nil
+
 ### done channel
 
 done channel 负责关闭创建的协程

@@ -46,11 +46,14 @@ VPATH = src:../headers
 
 #### 伪目标
 
+创建Makefile时应该为所有自定义的命令设置伪目标，这样可以避免有同名的文件在项目中
+
 伪目标不是一个文件，只是一个标签。伪目标一般没有依赖的文件，但是我们可以为伪目标指定所依赖的文件。伪目标同样可以作为默认目标，只要将其放在第一个。
 
 ```makefile
-all: prog1 prog2 prog3
-.PHONY:	all
+.PHONY:	* # 可以使用通配符
+.PHONY: $(MAKECMDGOALS) # 自动变量
+.PHONY: $(filter-out vendor node_modules,$(MAKECMDGOALS)) # 过滤掉vendor和node_modules,使用自动变量给定的伪目标
 
 prog1: prog1.o utils.o
 	cc -o prog1 prog1.o utils.o
@@ -62,11 +65,23 @@ prog3: prog3.o sort.o utils.o
   cc -o prog3 prog3.o sort.o utils.o
 ```
 
+#### 前置条件 Prerequisite
+
+当vendor命令不是伪目标时，在composer.json 或 composer.lock 发生改动时将会执行composer install，所以在伪目标一行将 vendor 排除
+
+```makefile
+.PHONY: $(filter-out vendor,$(MAKECMDGOALS))
+vendor: composer.json composer.lock
+	@composer install
+```
+
+
+
 ## 书写命令
 
 make 会按顺讯一条一条的执行命令，每条命令的开头必须以 tab 键开头，除非命令是紧跟在依赖规则后面的分号后的。命令行之间的空格或空行会被忽略，如果该空格或空行是一个 tab 键开头，那么 make 会认为其是一个空命令。
 
-#### 显示命令
+#### @
 
 `@` 字符在命令行前，那么这个命令将不被 make 显示出来
 
@@ -123,6 +138,17 @@ endef
 ```
 
 ## 使用变量
+
+#### 传递变量
+
+make foo arg=ceshi
+
+```makefile
+foo:
+	@echo $(arg) # 会输出 ceshi
+```
+
+
 
 变量不能包含 `:,#,= 空格,回车` ，变量大小敏感
 
