@@ -1,47 +1,47 @@
 # git常用命令
 
-| 命令                                          | 说明                                                         |
-| --------------------------------------------- | ------------------------------------------------------------ |
-| git clone -b xxxx  .git                       | 克隆仓库，-b 参数可一个指定克隆远程分支                      |
-| git commit -am "xxx"                          | git会自动将工作目录中所有“已跟踪”的文件先add到暂存区，再执行commit命令 |
-| git commit --amend                            | 修改最后一次提交的注释信息                                   |
-| git log --decorate --all --graph --online     | 查看分支合并图                                               |
-| git reset --hard commit-id                    | 移动HEAD指向，将快照回滚到暂存区，并将暂存区文件还原到工作目录;**谨慎使用** |
-| git reset --soft commit-id                    | 只移动HEAD指向，但不会将快照回滚到暂存区                     |
-| git reflog                                    | 查看所执行过的指令                                           |
-| git mv old new                                | 移动并且还可重命名                                           |
-| git rm filename                               | 从工作区和暂存区删除该文件，如果想要彻底删除再执行git reset --soft HEAD~ 将快照回滚到上一个位置，然后重新提交 |
-| git rm --cached                               | 只删除暂存区文件，取消追踪                                   |
-| git rm -r --cached dirname/filename           | 删除远程文件，保留本地文件，再git commit,最后git push        |
-| git checkout -- filename                      | 恢复被删除的文件                                             |
-| git checkout -b name                          | 表示创建并切换到name分支                                     |
-| git checkot -b branch-name origin/branch-name | 创建本地和远程对应的分支                                     |
-| git branch name                               | 创建分支                                                     |
-| git checkout name                             | 切换分支                                                     |
-| git branch                                    | 列出所有分支，当前分支会有*                                  |
-| git merge name                                | 合并name分支到当前分支                                       |
-| git branch --merged                           | 显示所有已经合并到你当前分支的列表                           |
-| git branch --no-merged                        | 显示所有没有合并到你当前分支的分支列表                       |
-| git branch -d name                            | 删除分支，D强制删除分支                                      |
-| git branch -r                                 | 查看远程分支                                                 |
-| git branch -r -d origin/branch-name           | 删除远程分支，再推送                                         |
-| git checkout --track origin/branch-name       | 跟踪指定上游分支                                             |
-| git branch -u origin/branch-name              | 修改本地分支正在跟踪的上游分支                               |
-| git stash                                     | 把当前工作储藏                                               |
-| git stash list                                | 查看储藏列表                                                 |
-| git stash apply name                          | 恢复储藏                                                     |
-| git stash drop name                           | 删除储藏                                                     |
-| git stash show -p name \| git apply -R        | 取消储藏，name不指定，Git会选择最近的储藏                    |
-| git tag                                       | 查看所有标签                                                 |
-| git tag -a tag-name -m 'xxxx'                 | 含附注的标签，tag-name：版本号，有私钥可以用GPG将-a变为-s    |
-| git tag -v tag-name                           | 验证标签                                                     |
-| git push origin tag-name                      | 分享标签，git push 默认不推送标签，推送所有本地标签用--tags  |
-| git show tagname                              | 查看标签信息                                                 |
-| git tag -d tagname                            | 删除本地标签                                                 |
-| git stripsapce < README.md                    | 去掉行尾空白符，多个空行压缩成一行，必要时在文件末尾增加一个空行 |
-| git show :/query                              | 查询之前所有提交信息，找到条件相匹配的最近一条，query是想搜索的词语，区分大小写，q键退出 |
-| git remote add name url                       | 添加远程仓库 name为自定义主机名 url为git远程仓库地址         |
-| git update-index --assume-unchanged PATH      | 忽略指定的文件或目录，由于这个文件是被版本库追踪的且是共有的，使用这个命令会忽略本地的修改，这样可以使的不会影响他人 |
+| 命令                                           | 说明                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| git clone -b xxxx  .git                        | 克隆仓库，-b 参数可一个指定克隆远程分支                      |
+| git commit -am "xxx"                           | git会自动将工作目录中所有“已跟踪”的文件先add到暂存区，再执行commit命令 |
+| git commit --amend                             | 修改最后一次提交的注释信息                                   |
+| git log --decorate --all --graph --online      | 查看分支合并图                                               |
+| git reset --hard commit-id                     | 移动HEAD指向，将快照回滚到暂存区，并将暂存区文件还原到工作目录;**谨慎使用** |
+| git reset --soft commit-id                     | 只移动HEAD指向，但不会将快照回滚到暂存区                     |
+| git reflog                                     | 查看所执行过的指令                                           |
+| git mv old new                                 | 移动并且还可重命名                                           |
+| git rm filename                                | 从工作区和暂存区删除该文件，如果想要彻底删除再执行git reset --soft HEAD~ 将快照回滚到上一个位置，然后重新提交 |
+| git rm --cached                                | 只删除暂存区文件，取消追踪                                   |
+| git rm -r --cached dirname/filename            | 删除远程文件，保留本地文件，再git commit,最后git push        |
+| git checkout -- filename                       | 恢复被删除的文件                                             |
+| git checkout -b name                           | 表示创建并切换到name分支                                     |
+| git checkout -b branch-name origin/branch-name | 创建本地和远程对应的分支                                     |
+| git branch name                                | 创建分支                                                     |
+| git checkout name                              | 切换分支                                                     |
+| git branch                                     | 列出所有分支，当前分支会有*                                  |
+| git merge name                                 | 合并name分支到当前分支                                       |
+| git branch --merged                            | 显示所有已经合并到你当前分支的列表                           |
+| git branch --no-merged                         | 显示所有没有合并到你当前分支的分支列表                       |
+| git branch -d name                             | 删除分支，D强制删除分支                                      |
+| git branch -r                                  | 查看远程分支                                                 |
+| git branch -r -d origin/branch-name            | 删除远程分支，再推送                                         |
+| git checkout --track origin/branch-name        | 跟踪指定上游分支                                             |
+| git branch -u origin/branch-name               | 修改本地分支正在跟踪的上游分支                               |
+| git stash                                      | 把当前工作储藏                                               |
+| git stash list                                 | 查看储藏列表                                                 |
+| git stash apply name                           | 恢复储藏                                                     |
+| git stash drop name                            | 删除储藏                                                     |
+| git stash show -p name \| git apply -R         | 取消储藏，name不指定，Git会选择最近的储藏                    |
+| git tag                                        | 查看所有标签                                                 |
+| git tag -a tag-name -m 'xxxx'                  | 含附注的标签，tag-name：版本号，有私钥可以用GPG将-a变为-s    |
+| git tag -v tag-name                            | 验证标签                                                     |
+| git push origin tag-name                       | 分享标签，git push 默认不推送标签，推送所有本地标签用--tags  |
+| git show tagname                               | 查看标签信息                                                 |
+| git tag -d tagname                             | 删除本地标签                                                 |
+| git stripsapce < README.md                     | 去掉行尾空白符，多个空行压缩成一行，必要时在文件末尾增加一个空行 |
+| git show :/query                               | 查询之前所有提交信息，找到条件相匹配的最近一条，query是想搜索的词语，区分大小写，q键退出 |
+| git remote add name url                        | 添加远程仓库 name为自定义主机名 url为git远程仓库地址         |
+| git update-index --assume-unchanged PATH       | 忽略指定的文件或目录，由于这个文件是被版本库追踪的且是共有的，使用这个命令会忽略本地的修改，这样可以使的不会影响他人 |
 
 **.gitignore语法规范**
 

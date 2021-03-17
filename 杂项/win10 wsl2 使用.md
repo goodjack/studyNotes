@@ -28,6 +28,12 @@ netsh interface ipv4 show excludedportrange protocol=tcp  # 根据这个命令�
 
 win 上的key权限在linux下不适用，需要修改权限 `chmod 600 ~/.ssh/id_rsa`
 
+> 上面步骤如果发生 permission denid，则需要在 /etc/wsl.conf （没有则新建）添加
+>
+> [automount]
+>		enabled = true
+> 		options = "metadata,umask=22,fmask=11"
+
 为了不再每次打开一个新tab时，都需要手动添加key：
 
 ```
