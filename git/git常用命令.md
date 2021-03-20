@@ -132,6 +132,26 @@
 | `git describe ref`                 | ref 是能被git识别的记录引用，如果没有指定 Git 会以 HEAD 为基准点，输出结果为 tag_numCommits_ghash ，tag 表示是离 ref 最近的标签，numCommits 表示 ref 与 tag 相差有多少个提交，hash 表示 ref hash 值的前几位，当有标签时只输出标签 |
 | git push origin source:destination | 表示将 source^(^可以指定提交)分支的内容 推送到远程的 destination 分支去 |
 
+#### git rebase 的操作
+
+主分支
+
+分支 a
+
+分支 b
+
+从主分支切换到分支a进行rebase合并
+
+```
+git checkout a
+git rebase master // 将分支a合并到主分支
+// 如遇到冲突解决后 git add xxx，然后 git rebase --continue
+// rebase --continue 作为 commit 命令
+// rebase --abort 取消 rebase
+```
+
+
+
 > cat .git/HEAD 可以查看当前的HEAD 指向，如果 HEAD 指向了一个引用，可以用 git symbolic-ref HEAD 查看它的指向
 
 ```
@@ -152,3 +172,4 @@
 `git push origin test:master` 表示推送 test 分支到 master 分支
 
 git pull 同理
+
