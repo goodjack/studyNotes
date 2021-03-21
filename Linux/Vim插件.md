@@ -52,3 +52,10 @@ vim 的包管理可以搭配 git 的 submodule 使用，这样方便添加和升
 
 
 
+#### vim-surround
+
+ds（delete a surrounding） 删除一个配对符号
+
+cs（change a surrounding） 替换一个成对的符号
+
+ys (yank a surrounding)  增加一个配对符号
