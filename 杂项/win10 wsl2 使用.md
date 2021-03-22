@@ -8,6 +8,16 @@ cat /etc/resolv.conf | grep 'nameserver' | awk '{print $2}'
 
 
 
+#### 改变wsl 的默认登录用户
+
+> wsl -l # 查询版本
+>
+> \# 如 ubuntu20.04
+>
+> ubuntu2004 config --default-user shea # 需要保证 shea 这个用户已经被创建在该版本中
+
+
+
 #### wsl2 与 trojan 搭配使用时遇到的端口被占用问题
 
 启动Trojan时提示socks5的端口被占用了，使用 `netstat -ano | findstr 51837` 查看占用端口发现，该端口没有被占用，经过一番谷歌，hyper-v 虚拟机占用了该端口。

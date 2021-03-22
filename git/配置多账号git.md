@@ -31,3 +31,13 @@ IdentityFile ~/.ssh/gitlab_id_rsa
 
 4. 配置完将 `xx_id_rsa.pub` 公钥复制到对应的网站即可，随后测试 `ssh -T git@github.com`
 
+#### 让git 的 ssh 协议走socks5代理
+
+> 首先下载 connect ，可以使用 scoop 下载
+>
+> Host github.com
+> 	HostName github.com
+> 	User shea  # 这个名字随便命
+> 	IdentityFile ~/.ssh/github_id_rsa
+>
+> ProxyCommand connect -S 127.0.0.1:51837 %h %p
