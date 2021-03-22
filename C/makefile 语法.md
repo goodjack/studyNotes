@@ -295,6 +295,11 @@ $(origin variable)
 ```makefile
 # 使用操作系统的 shell 命令，该函数会生成一个新的 shell 程序来执行命令，需要注意执行性能
 $(shell cat foo)
+stop:
+	# shell内的变量只能通过 $$var 的方式访问，因为是shell内的变量不是Makefile的变量
+	@pid=$(shell ps -ef | grep $(execDir)/$(execName) | grep -v "grep" | awk '{print $$2}'); \
+	# ;\ 使用该方式才能在下一行共享变量
+	echo $$pid
 ```
 
 #### 控制 make 函数
