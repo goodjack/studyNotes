@@ -18,7 +18,97 @@ GONOSUNDB="XXX"
   - `GOPROXY=direct` 表示依赖一律从源站下载
 - `GOSUMDB` 指示校验和服务器的地址和公钥，对于地址 `sum.golang.org`，公钥可以省略（内置）
 - `GOPRIVATE` 表示私域前缀。私域前缀下的所有依赖一律从源站下载，而且不做校验。支持多个私域前缀，每个私域用 `,` 分隔。支持通配符 `*`
-- 
+
+#### go 包代理协议
+
+go 使用协议约定的格式获取模块信息，并缓存到 **GOPATH/pkg/mod/cache/download** 目录下
+
+1. 获取模块列表
+
+   > 代理服务器需要响应 GET $GOPROXY/<module>/@v/list 请求，并返回当前代理服务中的该模块版本列表
+   >
+   > 如：curl https://proxy.golang.org/github.com/google/uuid/@v/list
+   >
+   > v1.0.0
+   >
+   > v1.1.1
+   >
+   > v1.1.0
+
+2. 获取模块元素数据
+
+   > 响应 GET $GOPROXY/<module>/@v/<version>.info 请求，返回当前代理服务器特定版本信息
+   >
+   > {“Version”:”v1.1.1”,”Time”:”2019-02-27T21:05:49Z”}
+
+3. 获取go.mod文件
+
+   > 响应 GET $GOPROXY/<module>/@v/<version>.md 请求，返回当前代理服务器特定版本模块的go.mod 文件
+   >
+   > 如：curl https://proxy.golang.org/github.com/google/uuid/@v/v1.1.1.mod
+   >
+   > module github.com/google/uuid # 该模块如果无依赖，则只会包含一个module名称
+
+4. 获取代码压缩包
+
+   > 响应 GET $GOPROXY<module>/@v/<version>.zip 请求，返回当前代理服务器中特定版本模块的压缩包
+   >
+   > 如：curl https://proxy.golang.org/github.com/google/uuid/@v/v1.1.1.zip # 该压缩包只包含该版本的文件，不包含版本控制信息
+
+5. 获取模块的最新可用版本
+
+   > 请求 GET $GOPROXY/<module>/@latest 获取指定模块的最新可用版本
+   >
+   > go 命令获取模块最新的可用版本，通常是通过 $GOPROXY/<module>/@v/list 获取版本列表，计算出最新的版本。
+   >
+   > 只有当list不可用时，才会使用 latest
+   >
+   > **所以这是代理服务器唯一的可选协议**
+
+可以使用 `go mod download -x -json {package}` 查看下载步骤
+
+
+
+#### GOSUMDB 工作机制
+
+GOSUMDB 用于 go 命令校验模块时应该信赖哪个数据库。
+
+完整的GOSUMDB配置
+
+> GOSUMDB=“<checksum database name>+<public key><checksum database service url>”
+>
+> 其中数据库名字和公钥必须指定，校验和数据库服务url则是可以选的，默认是 https://<checksum database name>
+
+**GOSUMDB 不能确保模块是否包含恶意代码，只能保证构建的一致性**
+
+> go 命令会通过 https://<checksum database service url>/lookup/<module>@<version> 来查询特定模块版本的hash值
+>
+> 校验和数据库通过存储hash值，给特定的模块版本提供了公证服务
+
+##### 校验流程
+
+1. 模块被下载后，go命令会对下载的模块做hash运算，然后与校验和数据库中的数据进行对比，依此确保下载的模块是否合法
+2. 模块hash被写入到go.sum 文件之前，对缓存在本地的模块做hash运算，与校验和数据库中的进行对比，确保本地的模块没有被篡改
+
+**如果校验某模块时，校验和数据库没有收录该模块，则会先拉取该模块版本，计算hash，存入数据库中。因此官方的校验和数据库只能收录公开的模块。**
+
+##### 校验和数据库代理
+
+> <proxyURL>/sumdb/<sumdb-name>/supported
+>
+> go 在访问 GOSUMDB 时，会通过该接口询问模块代理是否能代理校验和数据库
+
+
+
+#### 私有模块
+
+私有模块前缀支持通配符，多个模块之间使用逗号分隔
+
+`GOPRIVATE=*.corp.example.com,rsc.io/private`
+
+私有模块不会从代理服务器下载代码，也不会使用校验服务器来检查下载的代码
+
+
 
 go 包管理工具：
 
