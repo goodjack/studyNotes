@@ -1,3 +1,22 @@
+### max_map_count 问题
+
+修改 vm.max_map_count=262144
+
+win10  wsl 修改
+
+```
+wsl -d docker-desktop
+sysctl -w vm.max_map_count=262144
+
+# 上面的方法不能持久，每次重启就失效
+通过 win+R 输入 shell:startup 进入到目录中，在目录底下创建一个 .bat 的脚本
+@echo off
+wsl -d docker-desktop sysctl -w vm.max_map_count=262144
+这样每次电脑开机都会执行这个脚本了
+```
+
+
+
 #### 索引别名
 
 **tips：别名查询也是有一定限制的**
