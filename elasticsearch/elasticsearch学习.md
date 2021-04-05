@@ -199,41 +199,358 @@ POST index/_msearch
 > - sort 排序，from 和 size 分页
 > - profile 可以查看查询是如何被执行的
 
-使用 RESTful api 对 elasticsearch 进行操作
+##### 泛查询与指定字段查询
 
-| MySQL              | elasticsearch    |
-| ------------------ | ---------------- |
-| 数据库（Database） | 索引（index）    |
-| 表（table）        | 类型（type）     |
-| 行（row）          | 文档（document） |
-| 列（column）       | 字段（fields）   |
+```
+GET /index/_search?q=2012  # 泛查询
+GET /index/_search?q=2012&df=title  # 指定字段查询
+```
 
-**6.0 以后，一个 index 下，只允许有一个 type**
+##### Term 和 Phrase
 
-## 查询语句 Query DSL
+```
+GET /index/_search?q=title:"a b" // pharse 查询，表示要按照 a b 的顺序查询
+GET /index/_search?q=title:(a b) // 分组查询，表示要包含 a 或 b
+```
 
-### Boolean query
+##### 查询操作符
 
-| 参数                 | 描述                                                         |
-| -------------------- | ------------------------------------------------------------ |
-| must                 | 必须匹配，并且会增加 score 的分数                            |
-| filter               | 必须匹配，会忽略 score ，filter 会在 filter context 中执行，并且会缓存 |
-| should               | 匹配                                                         |
-| must_not             | 必须不匹配，忽略score，在 filter context 中执行，会缓存      |
-| minimum_should_match | 最小匹配，可以指定一个数字或者是百分比，如果 bool query 中只包含 should 没有 must 和 filter ，那么默认值是 1，否则是 0 |
+```
+AND、OR、NOT 或者 && 、||、!
+必须大写
+title:(a NOT b)
 
-### Boosting query
+分组
++ 表示 must
+- 表示 must_not
+例：title:(+a -b) 表示必须包含a 不包含b
 
-- positive：查询必须匹配
-- negative：匹配到此处的会减少 score
-- negative_boost ：浮点数在 0 到 1.0 之间，用于 negative 去减少 score
+范围查询
+区间：[]闭区间，{}开区间
+year:{2019 TO 2018}
+year:[* TI 2018]
 
-### Constant score query
+算数符号
+year:>2010
+year:(>2010 && <=2018)
+year:(+>2010 +<=2018)
 
-- filter：必须匹配，不会计算 relevance scores，会缓存
-- boost：用于匹配每个 filter 查询的 relevance score，默认是 1.0
+通配符查询（通配符查询效率低，占用内存大）
+？ 代表1个字符 * 代表 0 或多个字符
+title:mi?d
+title:be*
 
-### Disjunction max query
+正则表达
+title: [bt]oy
 
-- queries：匹配多个子查询，如果匹配到了多个子查询会提高 relevance score
-- tie_breaker：浮点数在 0 至 1.0 之间，用于当匹配到时增长 relevance scores
+模糊匹配与近似查询
+title:befutifl~1
+title:"lord rings"~2
+```
+
+
+
+### Request Body Search
+
+分页
+
+```
+POST /index/_search
+{
+"from":1,
+"size":10,
+"query": {
+	"match_all": {
+	}
+}
+}
+```
+
+排序
+
+```
+GET /index/_search
+{
+	"sort": [{"order_date":"desc"}]
+	"query":{
+	"match_all":{}
+	}
+}
+```
+
+_source 过滤
+
+- _source  支持通配符
+- 如果 _source 没有存储，就只返回匹配文档的元数据
+
+```
+GET index/_search
+{
+	"_source": ["order_date","category.keyword"]
+	"query":{
+		"match_all": {}
+	}
+}
+```
+
+脚本字段
+
+```
+GET index/_search
+{
+	"script_fields": {
+		"new_field": {
+			"script": {
+				"lang": "painless",
+				"source": "doc['order_date'].value + 'hello'"
+			}
+		}
+	},
+	"query": {
+		"match_all": {}
+	}
+}
+```
+
+查询表达式
+
+```
+GET index/_search
+{
+	"query": {
+		"match": {
+			"comment": "last christmas" # 默认是 or
+			"operator": "AND"
+		}
+	}
+}
+```
+
+短语搜索
+
+```
+GET index/_search
+{
+	"query": {
+		"match_phrase": {
+			"comment": {
+				"query": "a b c", # 表示必须按照顺序出现
+				"slop": 1	# 设置这个值，可以使得顺序中间出现其它字段，这里允许出现一个字段
+			}
+		}
+	}
+}
+```
+
+Query string 
+
+```
+GET index/_search
+{
+	"query": {
+		"query_string":{
+			"default_field": "name",	# 指定查询字段，等于 df，多个字段 ["a","b"]
+			"query": "a AND b" 
+		}
+	}
+}
+```
+
+simple query string
+
+- 类似 query string，会忽略错误的语法，同时只支持部分查询语法
+
+- 不支持 AND OR NOT，会当做字符串处理
+- Term之间的默认关系是 OR，可以指定operator
+- 支持部分逻辑：
+  - \+ 替代 AND
+  - | 替代 OR
+  - \- 替代 NOT
+
+```
+GET index/_search
+{
+	"query":{
+		"simple_query_string": {
+			"query": "a b",
+			"fields": ["a"]
+			"default_operator": "AND"
+		}
+	}
+}
+```
+
+### Mapping & Daynamic Mapping
+
+mapping 类似数据库的 schema，作用：
+
+- 定义索引中的字段名称
+- 定义字段的数据类型，例如字符串，数字，布尔
+- 字段，倒排索引的相关配置
+
+mapping 会把 json 文档映射成 Lucene 所需要的扁平格式
+
+一个 mapping 属于一个索引的 Type
+
+- 每个文档都属于一个 Type
+- 一个 Type 有一个 mapping 定义
+- 7.0 开始 不需要在 mapping 中指定 Type 信息
+
+字段的数据类型：
+
+- 简单类型
+  - Text、keyword
+  - Date
+  - Integer、float
+  - Boolean
+  - IPv4 & IPv6
+- 复杂类型 对象和嵌套对象
+  - 对象类型、嵌套类型
+- 特殊类型
+  - geo_point & geo_shape 、percolator
+
+#### dynamic mapping 类型自动识别
+
+| JSON类型 | es类型                                                       |
+| -------- | ------------------------------------------------------------ |
+| 字符串   | 匹配日期格式，设置成date<br />配置数字设置为 float 或 long，该选项默认关闭<br />设置为text，并且增加keyword字段 |
+| 布尔值   | boolean                                                      |
+| 浮点数   | float                                                        |
+| 整数     | long                                                         |
+| 对象     | object                                                       |
+| 数组     | 由第一个非空数值类型所决定                                   |
+| 空值     | 忽略                                                         |
+
+##### 更改mapping类型
+
+1. 新增字段
+   - dynamic 设为 true，一旦有新增字段写入，mapping 同时也被更新
+   - dynamic 设为 false，mapping 不会被更新，新增字段的数据无法被索引，但是信息会出现在 _source 中
+   - dynamic 设为 strict，文档写入失败
+2. 对已有字段，一旦已有数据写入，就不再支持修改字段定义。如果希望改变字段类型，必须 reindex api，重建索引
+
+#### Multi Match Query
+
+单字符串和多字段搜索
+
+```http
+POST index/_search
+{
+	"query": {
+		"multi_match": {
+			"type": "best_fields",	// 默认的查询类型
+			"query": "Quick pets",
+			"fields": ["title","body"],	// 会依据这个数组内的字段，去最高分的数据
+			"tie_breaker": 0.2,
+			"minimum_should_match": "20%",
+		}
+	}
+}
+```
+
+#### Function Score Query
+
+优化算分
+
+```http
+POST index/_search
+{
+	"query": {
+		"function_score": {
+			"query": {
+				"multi_match": {
+					"query": "popularity",
+					"fields": ["title","content"]
+				}
+			},
+			"field_value_factor": {	// 指定算分的函数和因子
+				"field": "votes",
+				"modifier": "log1p",
+				"factor": 0.1
+			},
+			"boost_mode": "sum",
+			"max_boost": 3
+		}
+	}
+}
+```
+
+#### 分页与遍历
+
+scroll
+
+> 需要全部文档，例如导出全部数据
+
+```http
+POST index/_search?scroll=5m # scroll 表示创建一个 5m 的快照，但有新数据写入以后无法被查到
+{
+	"size": 1,				# 创建成功后，会返回一个 scroll_id
+	"query": {
+		"match_all": {}
+	},
+}
+
+POST  _search/scroll
+{
+	"scroll": "1m",
+	"scroll_id": "_scroll_id"
+}
+```
+
+
+
+
+pagination
+
+> from 和 size
+>
+> 深度分页，则使用 search after
+
+```http
+POST index/_search
+{
+	"size": 1,
+	"query": {
+		"match_all": {}
+	},
+	"search_after": [	# 使用 search after 必须要确保有一个唯一排序id，如 _id， 每次使用结果集返回的最后一个 id
+		12,
+		"fasffhfsdf"
+	],
+	"sort": [
+		{"age": "desc"},
+		{"_id": "asc"},
+	]
+}
+```
+
+### 聚合查询 aggregation
+
+#### Metric Aggregation
+
+- 单值分析：只输出一个分析结果
+  - min，max，avg，sum
+  - Cardinality （类似 distinct count）
+- 多值分析：输出多个分析结果
+  - stats，extended stats
+  - percentile，percentile rank
+  - top hits
+
+#### Bucket Aggregation
+
+按照一定规则，将文档分类到不同的bucket中。
+
+#### pipeline Aggregation
+
+支持对聚合分析的结果，再次进行聚合分析
+
+pipeline 的分析结果会输出到原结果中，根据位置不同，分为两类：
+
+- sibling：结果和现有分析结果同级
+  - max，min，avg，sum bucket
+  - stats，extended status bucket
+  - percentiles bucket
+- parent：结果内嵌到现有聚合分析结果之中
+  - derivative 求导
+  - cumulative sum （累计求和）
+  - moving function （滑动窗口）
