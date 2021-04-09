@@ -59,9 +59,46 @@ port,err := net.LookupPort("tcp","telnet") // telnet 23 端口
 
 XDR (外部资料表示法) RFC 1832 ，该表示由 sun 公司发明。但该序列化不包含类型信息，XDR 是天生不安全的
 
-GOB 只能用 go 交互的序列化协议
-
 ASN.1 当初是一个为电信行业设计的复杂标准。当前主要用于对认证系统中普遍使用的 x.509 证书的编码。Go 对 ASN.1 支持主要是 x.509 证书的读写。
 
 > asn1 允许任意大小的整数。在go中是区分无符号和有符号的整数，因此一个超出了int64最大值的uint64，可能会失败。
+
+JSON
+
+gob：go 特有的序列化。只能编码go的数据类型。支持除了 interface、function、channel 之外的所有数据类型。gob 编解码对结构体是否导出没有影响
+
+```go
+type Person struct {
+   	Name string
+}
+
+type Person2 struct {
+    name string
+}
+
+p := Persion{
+    Name:"fafa"
+}
+encoder := gob.NewEncoder(os.Stdout)
+encoder.Encode(&p)
+
+var p2 Person2
+de := gob.NewDecoder(os.Stdout)
+de.Decode(&p2)
+
+```
+
+## 字符编码
+
+#### utf16 
+
+utf16 编码可以用16位字节无符号整形数组处理。
+
+将一个Go的utf-8正常编码的字符串转换 utf-16 编码，应先将字符串转成 []rune 数组，
+
+#### 小端序和大端序
+
+
+
+## 安全
 
