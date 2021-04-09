@@ -108,7 +108,28 @@ GOSUMDB 用于 go 命令校验模块时应该信赖哪个数据库。
 
 私有模块不会从代理服务器下载代码，也不会使用校验服务器来检查下载的代码
 
+#### 配置 go get 获取私有仓库
 
+- 使用访问令牌
+
+  如：gitlab 去主页获取访问 token 来实现访问仓库
+
+  ```
+  对项目生效
+  git config http.extraheader "PRIVATE-TOKEN:{token}"
+  
+  对所有项目生效
+  git config --global http.extraheader "PRIVATE-TOKEN:{token}"
+  ```
+
+- 使用 git 方式拉取代码
+
+  ```
+  全局替换，该域名下都走 ssh 协议
+  git config --global url."git@{url}:".insteadof "https://{url}/"
+  ```
+
+  
 
 go 包管理工具：
 

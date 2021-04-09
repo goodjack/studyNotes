@@ -42,3 +42,4 @@
   `scp local_file_address server_user@ip:remote_file_address`
 
 **对于文件夹的操作加入参数 -r 即可**
+
