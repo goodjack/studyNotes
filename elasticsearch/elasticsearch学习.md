@@ -554,3 +554,317 @@ pipeline 的分析结果会输出到原结果中，根据位置不同，分为�
   - derivative 求导
   - cumulative sum （累计求和）
   - moving function （滑动窗口）
+
+> es 并不擅长处理关联关系，一般采用：
+>
+> - 对象类型
+> - 嵌套对象
+> - 父子关联关系
+> - 应用端关联
+
+### 嵌套对象 & 父子文档
+
+#### 父子文档
+
+```http
+PUT index
+{
+	"settings": {
+		"number_of_shards": 2,
+	},
+	"mappings": {
+		"properties": {
+			"blog_comments_relation": {
+				"type": "join",	# 通过 join 指定父子文档
+				"relations": {
+					"blog": "comment"	# 父文档 blog 子文档 comment
+				}
+			},
+			"content": {
+				"type": "text
+			},
+			"title": {
+				"type": "keyword"
+			}
+		}
+	}
+}
+
+// 索引父文档
+PUT index/_doc/blog1
+{
+	"title": "learning es",
+	"content": "learning es",
+	"blog_comments_relation": {
+		"name": "blog"	# 指定 blog 表示创建的是父文档
+	}
+}
+
+// 索引子文档
+PUT index/_doc/comment1?routing=blog1 # 加上 routing 确保父子文档在同一分片上
+{
+	"comment": "子文档",
+	"username": "shea",
+	"blog_comments_relation": {
+		"name": "comment", // 指定 comment 表示创建的是子文档
+		"parent": "blog1"	// 父文档是 blog1
+	}
+}
+
+// 根据父文档id查询评论
+POST index/_search
+{
+	"query": {
+		"parent_id": {
+			"type": "comment",	# 指定查询类型
+			"id": "blog1"	# 指定父文档id
+		}
+	}
+}
+
+// 根据子文档查询父文档
+POST index/_search
+{
+	"query": {
+		"has_child": {
+			"type": "comment",
+			"query": {
+				"match": {
+					"username": "shea" # 查询子文档中有名字为 shea 的父文档
+				}
+			}
+		}
+	}
+}
+
+// has parent，返回相关的子文档
+POST index/_search
+{
+	"query": {
+		"has_parent": {
+			"parent_type": "blog",
+			"query": {
+				"match": {
+					"title": "learning es" # 查询父文档 blog 中标题包含 learning es 的子文档
+				}
+			}
+		}
+	}
+}
+
+// 访问子文档，通过子文档id和父文档id. 更新同理
+GET index/_doc/{child id}?routing={parent id}
+```
+
+
+
+|      | nested object                      | parent / Child                         |
+| ---- | ---------------------------------- | -------------------------------------- |
+| 优点 | 文档存储在一起，读取性能高         | 父子文档可以独立更新                   |
+| 缺点 | 更新嵌套子文档时，需要更新整个文档 | 需要额外的内存维护关系。读取性能相对差 |
+| 场景 | 读居多，子文档偶尔更新，以查询为主 | 写，子文档更新频繁                     |
+
+### 重建索引
+
+重建索引情况：
+
+- 索引的 mapping 发生变更：字段类型更改，分词器及字典更新
+- 索引的 settings 发生变更：索引的主分片数发生改变
+- 集群内，集群间需要做数据迁移
+
+#### Update By Query & Reindex
+
+- update by query：在现有索引上重建
+- reindex：在其他索引上重建索引
+
+```http
+// 如果对 index 上的字段添加了一个分词器，可以直接调用这个 api 对索引进行重建
+POST index/_update_by_query 
+
+---------------------------------------------
+
+// 更改已有字段类型的 mappings 只能使用 reindex
+// 旧索引 A
+// 创建 A_1 索引
+PUT A_1/
+{
+	"mappings": {
+		"properties": {
+			"content": {
+				"type": "text",
+				"fields": {
+					"english": {
+						"type": "text",
+						"analyzer": "english",
+					}
+				}
+			},
+			"keyword": {
+				"type": "keyword",
+			}
+		}
+	}
+}
+// reindex 索引
+POST _reindex
+{
+	"source": {
+		"index": "A"
+	},
+	"dest": {
+		"index": "A_1"
+	}
+}
+```
+
+### Ingest Node & PainlessScript
+
+#### Ingest Node
+
+默认配置下，每个节点都是 ingest node。
+
+具有预处理数据的能力，可拦截 index 或 bulk api 的请求
+
+对数据进行转换，并重新返回给 index 或 bulk api
+
+```http
+POST _ingest/pipeline/_simulate   // 使用 simulate api 模拟 pipeline，模拟了一组processors，在docs中添加了一组测试数据
+{
+	"pipeline": {
+		"description": "split tags",
+		"processors": [
+			{
+				"split": {
+					"field": "tags",
+					"separator": ","
+				}
+			}
+		]
+	},
+	"docs": [
+		{
+			"_index": "index",
+			"_id": "id",
+			"_source": {
+				"tags":"go,python,java,php,javascript"
+			}
+		}
+	]
+}
+```
+
+
+|                | Logstash                                   | Ingest Node                            |
+| -------------- | ------------------------------------------ | -------------------------------------- |
+| 数据输入与输出 | 支持从不同的数据源读取，并写入不同的数据源 | 支持从es rest api 获取数据，并且写入es |
+| 数据缓冲       | 实现了简单的数据队列，支持重写             | 不支持缓冲                             |
+| 数据处理       | 支持插件，支持定制开发                     | 内置插件，开发插件扩展（需要重启）     |
+| 配置使用       | 增加了架构复杂度                           | 无需额外部署                           |
+
+#### Painless
+
+支持有 java 的数据类型及 Java Api 子集
+
+| 上下文               | 语法                   |
+| -------------------- | ---------------------- |
+| Ingestion            | ctx.field_name         |
+| Update               | ctx._source.field_name |
+| search & aggregation | doc[“field_name”]      |
+
+### 数据建模
+
+- Text
+  - 用于全文本字段，文本会被 analyzer 分词
+  - 默认不支持聚合分析及排序。需要设置 fielddata 为 true。
+- keyword
+  - 用于 id，枚举及不需要分词的文本
+  - 适用于 filter（精确匹配），排序和聚合
+- 设置多字段类型
+  - 默认会为文本类型设置成text，并且设置一个keyword字段
+  - 在处理人类语言时，通过增加 “英文”，“拼音” 和 “标准” 分词器，提高搜索结构
+- 枚举类型
+  - 设置为 keywrod，即便是数字，可以获得更好的性能
+- 更新频繁，聚合查询频繁的keyword类型字段
+  - 将 eager_global_ordinals 设置为 true
+
+```http
+// 对图书内容进行搜索，图书内容会导致 _source 内容过大
+// es fetch 数据时还是会传输 _source 中的数据
+// 解决方法
+// 关闭 _source
+// 将每个字段的 store 设置成 true，这样可以使得数据额外的存储在 es 中
+PUT books
+{
+	"mappings": {
+		"_source": {
+			"enabled": false
+		},
+		"properties": {
+			"author": {
+				"type": "keyword",
+				"store": true,
+			},
+			"cover_url": {
+				"type": "keyword",
+				"index": false,
+				"store": true
+			},
+			"description": {
+				"type": "text",
+				"store": true
+			},
+			"content": {
+				"type": "text",
+				"store": true,
+			},
+			"public_date": {
+				"type": "date",
+				"store": true
+			},
+			"title": {
+				"type": "text",
+				"fields": {
+					"keyword": {
+						"type": "keyword",
+						"ignore_above": 100
+					}
+				},
+				"store": true
+			}
+		}
+	}
+}
+
+// 搜索时，不会显示 _source 字段，需要指定显示的数据
+POST books/_search
+{
+	"stored_fields": ["title","author","public_date"],
+	"query": {
+		"match": {
+			"content": "searching",
+		}
+	},
+	"highlight": {
+		"fields": {
+			"content": {}
+		}
+	}
+}
+```
+
+- 避免 Null 值引起的聚合不准
+
+- 为索引的 mapping 加入 meta 信息，同时可以考虑将 mapping 文件上传 git 管理
+
+  ```http
+  PUT index
+  {
+  	"mappings": {
+  		"_meta": {
+  			"version": "1.0"
+  		}
+  	}	
+  }
+  ```
+
+  
