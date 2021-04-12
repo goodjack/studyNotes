@@ -35,3 +35,61 @@
 下载 etcd 的二进制文件，从 [etcd 源码](https://github.com/etcd-io/etcd/blob/v3.4.9/Procfile) 中下载  goreman Profile 文件，它描述了etcd进程名、节点数、参数等信息。
 
 使用 `goreman -f Profile start` 就可以快速启动etcd集群
+
+
+
+### 鉴权
+
+#### 密码认证
+
+```bash
+etcdctl user add root:root # 创建root账号
+etcdctl auth enable # 启用鉴权
+```
+
+#### Simple Token
+
+当用户身份验证通过后，生成一个随机的字符串返回给 client。etcd 默认会每 5 分钟检查 token 是否过期。
+
+simple token 可描述性差，client 无法通过 token 获取到过期时间、用户名、签发者等信息。
+
+#### JWT token
+
+应当使用 jwt token 替代 simple token
+
+#### 证书认证
+
+etcd 中如果启用了 client 证书认证（--client-cert-auth) 。它会取 Subject 中 CN 字段作为用户名。
+
+<img src="etcd.assets/55e03b4353c9a467493a3922cf68b294.png" style="zoom:50%;" />
+
+#### RBAC
+
+```bash
+# 创建一个 admin role
+etcdctl role add admin --user root:root
+# 分配一个可读写范围数据的权限给 admin role
+etcdctl role grant-permission admin readwrite hello name --user root:root
+# 将用户 alice 和 admin role 关联起来
+etcdctl user grant-role alice admin --user root:root
+```
+
+### 租约 Lease
+
+Lease 一种活性检测机制。client 和 server 之间存在一个约定，内容是 etcd server 保证在约定的有效期（TTL），不会删除你关联到 Lease 上的 kv。
+
+应用场景：leader 选举、k8s event 自动淘汰、服务发现场景故障节点自动剔除等问题。
+
+![](etcd.assets/ac70641fa3d41c2dac31dbb551394b7c.png)
+
+> 两个常驻 goroutine
+>
+> - RevokeExpiredLease：定时检查是否有过期lease
+> - CheckpointScheduleLeases：定时出发更新 lease 剩余到期时间
+>
+> 各个接口：
+>
+> - Grant：创建一个指定秒数（TTL）的 lease，lessor 会将 lease 信息持久化存储在 boltdb 中
+> - Revoke：撤销 lease 并删除其关联的数据
+> - LeaseTimeToLive：获取一个 lease 的剩余时间
+> - LeaseKeepAlive：为 lease 续期
