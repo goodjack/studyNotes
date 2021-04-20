@@ -118,4 +118,5 @@ client.Txn(ctx).If(cmp1, cmp2, ...).Then(op1, op2, ...,).Else(op1, op2, …)
 - 开启 etcd 数据毁坏检测功能：
   - --experimental-initial-corroupt-check：检查各个节点数据是否一致，如果不相等则无法启动
   - --experimental-corrupt-check-time：每隔一定时间检查数据一致性
+- 鉴权使用证书认证；密码认证确保复用 token（不推荐）
 - 做好备份

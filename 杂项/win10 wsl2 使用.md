@@ -53,3 +53,12 @@ sudo apt install keychain
 eval `keychain --eval --agents ssh id_rsa`
 ```
 
+#### wsl2 docker exit 139
+
+```
+%userprofile%\.wslconfig # 此文件中写入配置
+
+[wsl2]
+kernelCommandLine = vsyscall=emulate
+```
+

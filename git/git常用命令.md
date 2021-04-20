@@ -121,7 +121,7 @@
 | Git命令                            | 说明                                                         |
 | ---------------------------------- | ------------------------------------------------------------ |
 | git merge                          | 合并分支，git merge {branch} 在当前所在分支把 branch 拉过来  |
-| `git rebase`                       | 合并分支，可以创造线性的提交历史，git rebase {branch}，将当前所在的分支合并到 {branch} |
+| `git rebase`                       | 合并分支，可以创造线性的提交历史，git rebase {branch}，将{branch}分支合并到当前分支 |
 | `git checkout HEAD`                | 改变 head 指向可使用 `HEAD^` 或 `HEAD~num`                   |
 | `git rebase --interactive HEAD^`   | 交互式 rebase 可以选择HEAD内排序方式 --interactive 简写 -i   |
 | `git branch -f 分支名 hash值`      | -f 参数强制改变分支的指向，hash 值 在 git log 可以查看，git branch -f {branch} HEAD~3，将 branch 分支强制移动到了 HEAD位置的前3个位置上，也就表示此时的branch分支指向的位置在 HEAD 的前3个上 |
