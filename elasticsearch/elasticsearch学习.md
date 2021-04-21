@@ -380,7 +380,7 @@ GET index/_search
 }
 ```
 
-### Mapping & Daynamic Mapping
+### Mapping & Dynamic Mapping
 
 mapping 类似数据库的 schema，作用：
 
