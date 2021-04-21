@@ -867,4 +867,11 @@ POST books/_search
   }
   ```
 
-  
+
+### 索引管理API
+
+- open/close index：索引关闭后无法进行读写，但是索引数据不会被删除
+- shrink index：可以将索引的主分片数收缩到较小的值
+- split index：可以扩大主分片个数
+- rollover index：索引尺寸或者时间超过一定值后，创建新的
+- rollup index：对数据进行处理后，重新写入，减少数据量
