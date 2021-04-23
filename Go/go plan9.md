@@ -58,6 +58,10 @@ go 预定义了一些伪寄存器，这些伪寄存器适用所有的架构
 >
 > 一般 SP 和 PC 都是一个物理寄存器的别名。在 go 汇编中区别对待了它们。go中使用需要一个 symbol，first_arg+0(FP)，而为了访问实际寄存器上的值，需要使用 R 。如 R13，R15
 
+#### TLS
+
+> 由 runtime 维护的伪寄存器，保存了指向当前 g 的指针，这个 g 的数据结构会跟踪 goroutine 运行时的所有状态值。
+
 ### 指令
 
 #### TEXT 
@@ -74,7 +78,7 @@ TEXT runtime·profileloop(SB),NOSPLIT,$8
 	RET
 ```
 
-栈帧大小即使参数大小，通过 - 分隔。如：$24-8 表示函数有 24 byte 的栈帧和调用参数具有 8 byte，都存在于调用者的栈帧中。
+栈帧大小即是参数大小，通过 - 分隔。如：$24-8 表示函数有 24 byte 和参数有 8 byte，都存在于调用者的栈帧中。
 
 如果没有 NOSPLIT 在 text 中，则参数大小必须指定
 
@@ -97,7 +101,59 @@ DATA divtab<>+0x3c(SB)/4, $0x81828384
 
 ```
 GLOBL divtab<>(SB), RODATA, $64
-divtab<>，4 byte值在一个只读的 64 byte 表上
+divtab<>，在64byte只读表上的4byte整数值
+
 GLOBL runtime·tlsoffset(SB), NOPTR, $4
+runtime·tlsoffset，4 byte，不包含指针，隐式清零
 ```
+
+可能会有一个或者两个指令，如果有两个，第一个表示位掩码标记。
+
+它们的被定义在 `#include textflag.h`  中：
+
+- DUPOK = 2
+
+  > 在一个二进制文件中具有多个重复符号实例是合法的。由链接器选择使用其中的一个
+
+- NOSPLIT = 4
+
+  > 针对 TEXT items。不会插入前导检查堆栈是否拆分。这个栈调用可以加上任何参数，必须对应栈顶段剩余空间。经常用来保护栈代码划分。
+
+- RODATA = 8
+
+  > 针对 DATA 和 GLOBL。因为这个数据不包含指针所以不需要gc扫描
+
+- WRAPPER = 32
+
+  > 针对 TEXT。这是一个包装函数，不能被作为一个 disabling recover
+
+- NEEDCTXT = 64
+
+  > 针对 TEXT。这是一个闭包用来作为上下文寄存器
+
+- LOCAL = 128
+
+  > 该符号位于本地的动态共享库
+
+- TLSBSS = 256
+
+  > 针对 DATA 和 GLOBL。将数据放入线程中存储。
+
+- NOFRAME = 512
+
+  > 针对 TEXT。不要插入指令去分配栈帧并保存/恢复返回地址。仅在函数声明了一个大小为0的栈帧。
+
+- TOPFRAME = 2048
+
+  > 针对 TEXT。函数在调用堆栈顶部。回溯应该在此函数停止。
+
+### interacting with Go Types and constants
+
+如果一个包有 `.s` 文件，则在编译时会直接调用 `go_asm.h` ，然后这个 `.s` 文件会被  `#include`
+
+
+
+### 链接
+
+[go asm](https://golang.org/doc/asm)
 
