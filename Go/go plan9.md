@@ -90,18 +90,17 @@ TEXT runtime·profileloop(SB),NOSPLIT,$8
 
 每个 DATA 指令都会初始化一块对应的内存，没有明确初始化的内存会被清零
 
-```
+```assembly
 DATA	symbol+offset(SB)/width, value
-symbol 在 SB 的 offset 上，value 的大小是 width
+# symbol 在 SB 的 offset 上，value 的大小是 width
 
-DATA divtab<>+0x3c(SB)/4, $0x81828384
+DATA divtab<>+0(SB)/4, $1
 ```
 
 #### GLOBL
 
-```
+```assembly
 GLOBL divtab<>(SB), RODATA, $64
-divtab<>，在64byte只读表上的4byte整数值
 
 GLOBL runtime·tlsoffset(SB), NOPTR, $4
 runtime·tlsoffset，4 byte，不包含指针，隐式清零
@@ -147,13 +146,104 @@ runtime·tlsoffset，4 byte，不包含指针，隐式清零
 
   > 针对 TEXT。函数在调用堆栈顶部。回溯应该在此函数停止。
 
+#### PCDATA
+
+> PCDATA tableid, tableoffset 第一个参数为表格的类型，第二个为表格的地址
+>
+> 类型：
+>
+> - PCDATA_StackMapIndex
+> - PCDATA_InlTreeIndex 主要用于内联函数的表格
+>
+> PCDATA 表格主要包含文件路径、行号和函数信息
+
+#### FUNCDATA
+
+> FUNCDATA tableid, tableoffset 表格类型，表格地址
+>
+> 类型：
+>
+> - FUNCDATA_ArgsPointerMaps 表示函数参数的指针信息
+> - FUNCDATA_LocalsPointermaps 表示局部指针信息表
+> - FUNCDATA_InlTree 表示被内联展开的指针信息表
+>
+> FUNC表格，可以让Go的垃圾回收期跟踪全部指针的生命周期，同时根据指针指向的地址是否在被移动的栈范围来确定是否要进行指针移动
+
 ### interacting with Go Types and constants
 
 如果一个包有 `.s` 文件，则在编译时会直接调用 `go_asm.h` ，然后这个 `.s` 文件会被  `#include`
 
 
 
-### 链接
+### 示例
+
+```go
+//go:noinline
+func add(a, b int32) (int32,bool) {
+    return a + b, true
+}
+
+func main() {
+    add(10, 32)
+}
+```
+
+编译后汇编如下：
+
+```assembly
+# 编译
+# GOOS=linux GOARCH=amd64 go tool compile -S add.go
+
+"".add STEXT nosplit size=20 args=0x10 locals=0x0 funcid=0x0
+        0x0000 00000 (.\main.go:4)      TEXT    "".add(SB), NOSPLIT|ABIInternal, $0-16
+        0x0000 00000 (.\main.go:4)      FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x0000 00000 (.\main.go:4)      FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x0000 00000 (.\main.go:5)      MOVL    "".b+12(SP), AX
+        0x0004 00004 (.\main.go:5)      MOVL    "".a+8(SP), CX
+        0x0008 00008 (.\main.go:5)      ADDL    CX, AX
+        0x000a 00010 (.\main.go:5)      MOVL    AX, "".~r2+16(SP)
+        0x000e 00014 (.\main.go:5)      MOVB    $1, "".~r3+20(SP)
+        0x0013 00019 (.\main.go:5)      RET
+
+"".main STEXT size=66 args=0x0 locals=0x18 funcid=0x0
+        0x0000 00000 (.\main.go:8)      TEXT    "".main(SB), ABIInternal, $24-0
+        0x000f 00015 (.\main.go:8)      SUBQ    $24, SP
+        0x0013 00019 (.\main.go:8)      MOVQ    BP, 16(SP)
+        0x0018 00024 (.\main.go:8)      LEAQ    16(SP), BP
+        0x001d 00029 (.\main.go:8)      FUNCDATA        $0, 
+        0x001d 00029 (.\main.go:8)      MOVQ    $137438953482, AX
+        0x0027 00039 (.\main.go:8)      MOVQ    AX, (SP)
+        0x002b 00043 (.\main.go:8)      PCDATA  $1, $0
+        0x002b 00043 (.\main.go:8)      CALL    "".add(SB)
+        0x0030 00048 (.\main.go:8)      MOVQ    16(SP), BP
+        0x0035 00053 (.\main.go:8)      ADDQ    $24, SP
+        0x0039 00057 (.\main.go:8)      RET
+```
+
+#### add 函数
+
+```assembly
+0x0000 00000 (.\main.go:4)      TEXT    "".add(SB), NOSPLIT|ABIInternal, $0-16
+```
+
+- `0x0000 00000`：当前指令的偏移，相对于当前函数的开始
+
+- `TEXT    "".add(SB)`：text 指令声明 `"".add` 符号，`""` 当链接时会被当前包名替换 `main.add`，最终链接进二进制包中
+
+- `SB`：伪寄存器，`"".add(SB)` 通过链接器计算，从程序的起始空间开始定位常量和函数的位置，它是一个绝对地址。
+
+  ```
+  # 通过 objdump 可以看到程序的函数的绝对地址
+  objdump -j .text -t add | grep "main.add"
+  ```
+
+  
+
+### Links
 
 [go asm](https://golang.org/doc/asm)
+
+[go-internals](https://github.com/teh-cmc/go-internals)
+
+[plan9-assembly](https://mioto.me/2021/01/plan9-assembly/)
 
