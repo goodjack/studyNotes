@@ -1,10 +1,166 @@
 # k8s 集群安装
 
+> 系统: centos8.3
+>
+> master 1
+>
+> node 2
+
+## 初始化操作
+
+### 关闭防火墙
+
+```
+systemctl stop firewalld && systemctl disable firewalld
+```
+
+### 关闭 selinux
+
+```
+setenforce 0 && sed -i 's/enforcing/disabled/' /etc/selinux/config
+```
+
+### 关闭swap
+
+```
+swapoff -a && sed -ri 's/.*swap.*/#&/' /etc/fstab
+```
+
 ### 设置系统主机名以及 Host 文件的相互解析
 
 ```shell
-hostnamectl set-hostname k8s-master # 设置系统主机名，然后去 /etc/hosts 配置对应的解析域名
+hostnamectl set-hostname <master> # 设置系统主机名，然后去 /etc/hosts 配置对应的解析域名
+hostnamectl set-hostname <node1>
+hostnamectl set-hostname <node2>
+
+# master 添加
+cat >> /etc/hosts << EOF
+xxx.xxx.xxx.xxx master
+xxx.xxx.xxx.xxx node1
+xxx.xxx.xxx.xxx node2
+EOF
 ```
+
+### 将IPV4流量转发到 iptables 上
+
+```
+cat > /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system  #重新加载配置
+```
+
+### 同步时间
+
+```
+dnf install chrony -y
+sed -i'*.bak' 's/^pool .*\.org/pool time\.pool\.aliyun\.com/' /etc/chrony.conf
+systemctl enable chronyd && systemctl start chronyd
+chronyc -a makestep
+```
+
+### 安装docker
+
+```
+yum install -y yum-utils device-mapper-persistent-data lvm2 # 安装docker需要的组件
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo # 配置源
+yum makecache	# 刷新缓存
+yum install -y docker-ce docker-ce-cli containerd.io # 安装
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json << EOF
+{
+	"registry-mirrors": [
+		"https://b0yxfmz5.mirror.aliyuncs.com",
+		"https://docker.mirrors.ustc.edu.cn",
+		"https://mirror.ccs.tencentyun.com"
+	],
+	"exec-opts": ["native.cgroupdriver=systemd"],
+	"storage-driver": "overlay2",
+	"log-driver": "json-file",
+	"log-opts": {
+		"max-size": "100m"
+	}
+}
+EOF
+
+systemctl daemon-reload && systemctl restart docker && systemctl enable docker
+```
+
+## 使用kubeadm 创建集群
+
+### 添加kubernetes镜像源 安装 kubelet kubeadm kubectl
+
+```
+cat > /etc/yum.repos.d/kubernetes.repo << EOF
+[kubernetes]
+name=kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+
+yum install -y kubelet kubeadm kubectl
+systemctl enable kubelet
+```
+
+### 在master使用kubeadm 初始化控制节点
+
+```
+kubeadm config images list # 查看该版本的容器镜像版本
+
+kubeadm init --apiserver-advertise-address=192.168.217.128 --image-repository registry.cn-hangzhou.aliyuncs.com/mxy --pod-network-cidr=10.244.0.0/16
+
+# 然后根据终端的输出进行节点的加入操作
+
+# 初始化的token默认只有24小时，过期重新创建时
+kubeadm token create --print-join-command
+```
+
+### 安装pod网络附加组件
+
+```
+# calico 网络组件 在 kubeadm init 时需要指定 --pod-network-cidr=192.168.0.0/16
+kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+
+# 如果没有指定192.168.0.0 则需要手动修改文件
+kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+
+
+# flannel 网络组件 --pod-network-cidr=10.244.0.0/16
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+```
+
+### 创建一个nginx pod，测试集群是否可以正常访问
+
+```
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80 --type=NodePort
+kubectl get pod,svc
+
+# 访问 http://node_ip:port
+```
+
+
+
+## 遇到的问题
+
+### coredns imagepullbackoff
+
+```
+registry.cn-hangzhou.aliyuncs.com/mxy/coredns:v1.8.0 => registry.cn-hangzhou.aliyuncs.com/mxy/coredns/coredns:v1.8.0
+给 coredns 配置了 tag 后， 发现没有从本地获取还是从远端获取镜像
+执行下面命令，手动修改 coreddns 的 yaml 内的 image
+kubectl edit pod {coredns pod}
+```
+
+
+
+
+
+## 下面是过时的配置
 
 ### 安装依赖包
 
