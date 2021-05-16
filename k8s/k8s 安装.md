@@ -111,6 +111,7 @@ systemctl enable kubelet
 ```
 kubeadm config images list # 查看该版本的容器镜像版本
 
+# init 时，请先看下想装哪个网络附加组件，cidr 需要与网络附加组件配置相同。不然得修改，网络附加组件的配置，造成不必要的错误
 kubeadm init --apiserver-advertise-address=192.168.217.128 --image-repository registry.cn-hangzhou.aliyuncs.com/mxy --pod-network-cidr=10.244.0.0/16
 
 # 然后根据终端的输出进行节点的加入操作
