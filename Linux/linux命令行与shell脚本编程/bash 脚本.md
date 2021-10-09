@@ -260,7 +260,7 @@ getopts 使用两个环境变量。如果一个选项需要参数值，OPTARG �
 while getopts :ab:cd opt;do
 	case "$opt" in
 		a) echo "xxxx"
-		b} echo "xxxx $OPTARG"
+		b) echo "xxxx $OPTARG"
 		*) echo "xxxx"
 	esac
 done

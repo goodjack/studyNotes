@@ -6,7 +6,7 @@
 
 3. 此时可以使用 `ssh -i ~/.ssh/xxx_id_rsa user@server_ip` 来免密登录服务器
 
-4. 配置 ssh 登录别名 `vim ~/.ssh/config`
+4. 配置 ssh 登录别名 `vim ~/.ssh/config`-
 
    ```
    Host alias # 此处指定登录别名
