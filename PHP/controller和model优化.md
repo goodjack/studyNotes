@@ -16,5 +16,5 @@
 2. 符合 SOLID 的单一职责原则：数据库逻辑写在 repository ，没写在 controller
 3. 符合 SOLID 的依赖反转原则：controller 并非直接相依于 repository，而是将 repository 依赖注入进 controller
 
-参考 [Service](https://oomusou.io/laravel/service/) [Repository](https://oomusou.io/laravel/repository/)
+参考 [Service](https://old-oomusou.goodjack.tw/laravel/service/) [Repository](https://old-oomusou.goodjack.tw/laravel/repository/)
 
